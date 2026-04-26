@@ -1,0 +1,96 @@
+﻿@inject ICharactersRepository CharactersRepository
+@inject ISpellsRepository SpellsRepository
+
+@if (del && charId > 0)
+{
+    <div class="row">
+        <div class="col-md-11">
+            <h4>@spell.Name</h4>
+            <br />
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-danger" @onclick="Remove">Delete</button>
+        </div>
+    </div>
+}
+else if (admin)
+{
+    <div class="row">
+        <div class="col-md-11">
+            <h4>@spell.Name</h4>
+            <br />
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-danger" @onclick="Delete">Delete</button>
+        </div>
+    </div>
+}
+else
+{
+    <h4>@spell.Name</h4>
+    <br />
+}
+
+<div class="row">
+    @if (spell.Concentration is true)
+    {
+        <div class="col-md-1 border border-dark p-2 rounded" style="background: #EEECE5;">
+            <b>Arcana Cost</b><br>
+            @spell.Cost
+        </div>
+    }
+    else
+    {
+        <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+            <b>Arcana Cost</b><br>
+            @spell.Cost
+        </div>
+    }
+    <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+        <b>Casting Time</b><br>
+        @spell.Casting
+    </div>
+    <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+        <b>Colour</b><br>
+        @spell.Colour
+    </div>
+    <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+        <b>Type</b><br>
+        @spell.Type
+    </div>
+    <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+        <b>Duration</b><br>
+        @spell.Duration
+    </div>
+    <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+        <b>Range</b><br>
+        @spell.Range
+    </div>
+    @if (spell.Concentration is true)
+    {
+        <div class="col-md-1 border border-dark p-2 rounded" style="background: #EEECE5;">
+            <b>Concentration</b>
+        </div>
+    }
+</div>
+<h5>Effect</h5>
+<p>@spell.Effect</p>
+
+@code {
+    [Parameter]
+    public required Spell spell { get; set; }
+    [Parameter]
+    public int charId { get; set; } = 0;
+    [Parameter]
+    public required bool del { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+    void Remove()
+    {
+        CharactersRepository.RemoveSpell(charId, spell.SpellId);
+    }
+    void Delete()
+    {
+        SpellsRepository.DeleteSpell(spell.SpellId);
+    }
+}

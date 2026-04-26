@@ -1,0 +1,32 @@
+﻿@page "/delete/{charId:int}"
+@rendermode InteractiveServer
+@inject Data.AppData AppData
+@inject IUsersRepository UsersRepository
+@inject ICharactersRepository CharactersRepository
+@inject NavigationManager NavigationManager;
+
+<PageTitle>Confirm Delete</PageTitle>
+
+<h1>Are you sure you want to delete @character.CharacterName?</h1>
+
+<button type="button" class="btn btn-danger" onclick="@(() => Delete())">Yes, delete my character</button>
+
+@code {
+    [Parameter]
+    public int CharId { get; set; }
+    private Character character = new Character();
+    protected override void OnParametersSet()
+    {
+        character = CharactersRepository.GetCharacterById(CharId);
+    }
+    void Delete()
+    {
+        CharactersRepository.DeleteCharacter(CharId);
+        if (AppData.user is not null)
+        {
+            int id = AppData.user.UserId;
+            AppData.user = UsersRepository.GetUserById(id);
+        }
+        NavigationManager.NavigateTo("/");
+    }
+}

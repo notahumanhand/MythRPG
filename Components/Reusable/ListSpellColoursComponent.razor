@@ -1,0 +1,125 @@
+﻿@if (charclass.Equals("Acolyte"))
+{
+    <div class="row">
+        <div class="col-md-3">
+            <p>White</p>
+        </div>
+        <div class="col-md-3">
+            <p>Red</p>
+        </div>
+        <div class="col-md-3">
+            <p>Gold</p>
+        </div>
+        <div class="col-md-3">
+            <p>Brown</p>
+        </div>
+    </div>
+}
+else if (charclass.Equals("Fighter"))
+{
+    <div class="row">
+        <div class="col-md-2">
+            <p>Red</p>
+        </div>
+        <div class="col-md-3">
+            <p>Orange</p>
+        </div>
+        <div class="col-md-2">
+            <p>Gold</p>
+        </div>
+        <div class="col-md-3">
+            <p>Blue</p>
+        </div>
+        <div class="col-md-2">
+            <p>Purple</p>
+        </div>
+    </div>
+}
+else if (charclass.Equals("Guardian"))
+{
+    <div class="row">
+        <div class="col-md-2">
+            <p>Black</p>
+        </div>
+        <div class="col-md-2">
+            <p>Red</p>
+        </div>
+        <div class="col-md-2">
+            <p>Orange</p>
+        </div>
+        <div class="col-md-2">
+            <p>Green</p>
+        </div>
+        <div class="col-md-2">
+            <p>Blue</p>
+        </div>
+        <div class="col-md-2">
+            <p>Brown</p>
+        </div>
+    </div>
+}
+else if (charclass.Equals("Mage"))
+{
+    <div class="row">
+        <div class="col-md-2">
+            <p>Red</p>
+        </div>
+        <div class="col-md-2">
+            <p>Orange</p>
+        </div>
+        <div class="col-md-2">
+            <p>Gold</p>
+        </div>
+        <div class="col-md-2">
+            <p>Green</p>
+        </div>
+        <div class="col-md-2">
+            <p>Blue</p>
+        </div>
+        <div class="col-md-2">
+            <p>Purple</p>
+        </div>
+    </div>
+}
+else if (charclass.Equals("Scoundrel"))
+{
+    <div class="row">
+        <div class="col-md-4">
+            <p>Gold</p>
+        </div>
+        <div class="col-md-4">
+            <p>Blue</p>
+        </div>
+        <div class="col-md-4">
+            <p>Purple</p>
+        </div>
+    </div>
+}
+else if (charclass.Equals("Witch"))
+{
+    <div class="row">
+        <div class="col-md-2">
+            <p>Black</p>
+        </div>
+        <div class="col-md-2">
+            <p>Red</p>
+        </div>
+        <div class="col-md-2">
+            <p>Green</p>
+        </div>
+        <div class="col-md-2">
+            <p>Blue</p>
+        </div>
+        <div class="col-md-2">
+            <p>Purple</p>
+        </div>
+        <div class="col-md-2">
+            <p>Brown</p>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public required string charclass { get; set; }
+}

@@ -1,0 +1,16 @@
+﻿@inject ITraitsRepository TraitsRepository
+
+<option value="">v Choose Trait v</option>
+@foreach (var trait in traits)
+{
+    <option value="@trait.Name">@trait.Name: @trait.Source</option>
+}
+
+
+@code {
+    private List<Trait> traits = new List<Trait>();
+    protected override void OnParametersSet()
+    {
+        traits = TraitsRepository.GetTraits();
+    }
+}

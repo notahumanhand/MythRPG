@@ -1,0 +1,21 @@
+﻿@if (showId)
+{
+    @foreach (var bonus in bonuses)
+    {
+        <p>@bonus.BonusId: +@bonus.Amount @bonus.Type bonus to @bonus.Modifies</p>
+    }
+}
+else
+{
+    @foreach (var bonus in bonuses)
+    {
+        <p>+@bonus.Amount @bonus.Type bonus to @bonus.Modifies</p>
+    }
+}
+
+@code {
+    [Parameter]
+    public required List<Bonus> bonuses { get; set; }
+    [Parameter]
+    public required bool showId { get; set; }
+}

@@ -1,0 +1,15 @@
+﻿@inject ISpellsRepository SpellsRepository
+
+<option value="">v Choose Spell v</option>
+@foreach (var spell in spells)
+{
+    <option value="@spell.Name">(@spell.Colour) @spell.Name: @spell.Cost</option>
+}
+
+@code {
+    private List<Spell> spells = new List<Spell>();
+    protected override void OnParametersSet()
+    {
+        spells = SpellsRepository.GetSpells();
+    }
+}

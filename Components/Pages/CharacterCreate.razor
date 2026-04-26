@@ -1,0 +1,84 @@
+﻿@rendermode InteractiveServer
+@inject Data.AppData AppData
+@inject IUsersRepository UsersRepository;
+@inject ICharactersRepository CharactersRepository;
+@inject NavigationManager NavigationManager;
+
+@page "/create-character"
+
+<PageTitle>Mythmaven: Create Character</PageTitle>
+
+<h3>Create Character</h3>
+<br />
+
+<EditForm Model="character" FormName="formCharacter" OnValidSubmit="Create">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <div class="row">
+        <div class="col-md-10">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <InputText id="name" @bind-Value="character.CharacterName" class="form-control"></InputText>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="level">Starting Level</label>
+                <InputNumber id="level" @bind-Value="character.CharacterLevel" class="form-control"></InputNumber>
+                <ValidationMessage For="() => character.CharacterLevel"></ValidationMessage>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="species">Species</label>
+                <InputText id="species" @bind-Value="character.Species" class="form-control"></InputText>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="class">Class</label>
+                <InputSelect id="class" @bind-Value="character.CharacterClass" class="form-control">
+                    <ClassSelectOptionComponent></ClassSelectOptionComponent>
+                </InputSelect>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="alert alert-info">
+        These details can be changed later!
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a href="/" class="btn btn-primary">Cancel</a>
+</EditForm>
+@if (error)
+{
+    <p class="alert alert-danger">Something went wrong. Please refresh the page and try again.</p>
+}
+
+@code {
+    [SupplyParameterFromForm]
+    private Character character { get; set; } = new Character();
+    private bool error = false;
+    private void Create()
+    {
+        if (AppData.user is not null)
+        {
+            CharactersRepository.AddCharacter(character);
+            AppData.user.Characters.Add(character);
+            foreach (var c in AppData.user.Characters)
+            {
+                c.Traits = new List<Trait>();
+                c.Spells = new List<Spell>();
+            }
+            UsersRepository.UpdateUserCharacters(AppData.user.UserId, AppData.user.Characters);
+            int id = AppData.user.UserId;
+            AppData.user = UsersRepository.GetUserById(id);
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            error = true;
+        }
+    }
+}

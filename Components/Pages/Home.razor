@@ -1,0 +1,44 @@
+﻿@page "/"
+@inject Data.AppData AppData
+@inject IUsersRepository UsersRepository
+@inject ICharactersRepository CharactersRepository
+@rendermode InteractiveServer
+
+<PageTitle>Mythmaven: Home</PageTitle>
+
+<h1 class="title">Home</h1>
+@if (loggedIn)
+{
+    <CharacterListComponent characters="characters"></CharacterListComponent>
+    <br />
+    <br />
+    <a href="/create-character" class="btn btn-success">Create Character</a>
+    <a href="/import-character" class="btn btn-primary">Import Character</a>
+    <br />
+    <br />
+    <a href="/profile" class="btn btn-primary">My Profile</a>
+    @if (AppData.user is not null && AppData.user.UserId == 1)
+    {
+        <a href="/accounts" class="btn btn-danger">Manage Accounts</a>
+    }
+}
+else
+{
+    <p>You are logged out.</p>
+    <a href="/login" class="btn btn-primary">Log In</a>
+}
+
+@code {
+    private List<Character>? characters;
+    private bool loggedIn = false;
+    protected override void OnInitialized()
+    {
+        if (AppData.user is not null)
+        {
+            characters = AppData.user.Characters;
+            loggedIn = true;
+
+        }
+    }
+    
+}

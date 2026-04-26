@@ -1,0 +1,103 @@
+﻿:root {
+    --fill: white;
+    --t-fill: #ffffff80;
+    --primary: #57776e;
+    --t-primary: #57776e80;
+    --secondary: #8b7853;
+    --text: #4c362f;
+    --info: #f5f3f0;
+    --tertiary: #e4e0d6;
+    --t-tertiary: #e4e0d680;
+    --shelf: #9a7c5a;
+    --dark: black;
+    --t-dark: #00000080;
+    --link: #268869;
+    --h-link: #1c634d;
+}
+
+main {
+    background: var(--tertiary);
+    color: var(--text);
+    font-family: 'Cormorant';
+}
+
+.top-row {
+    display: none!important;
+}
+
+h1 {
+    font-family: 'Cinzel';
+    color: var(--primary);
+}
+
+.title {
+    text-align: center;
+    font-size: 50px;
+}
+
+h2, h3 {
+    color: var(--primary);
+    font-family: 'Cormorant SC';
+}
+
+h4, h5 {
+    color: var(--secondary);
+    font-style: italic;
+    font-family: 'Cormorant';
+}
+
+a {
+    color: var(--link);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--h-link);
+    text-decoration: underline;
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, var(--h-link) 0%, var(--tertiary) 70%) !important;
+}
+
+table.table tr {
+    border-bottom: 1px solid;
+}
+
+/* Fonts */
+@font-face {
+    font-family: 'Cinzel';
+    font-style: normal;
+    font-weight: 400 900;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/cinzel/v23/8vIJ7ww63mVu7gt79mT7.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Cormorant';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/cormorant/v21/H4clBXOCl9bbnla_nHIq75u9.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Cormorant SC';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/cormorantsc/v18/0yb5GD4kxqXBmOVLG30OGwsuqzAx.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Comic Neue';
+    font-style: italic;
+    font-weight: 700;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/comicneue/v8/4UaarEJDsxBrF37olUeD96_RXp5kLCND.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Fonts */

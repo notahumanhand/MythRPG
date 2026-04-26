@@ -1,0 +1,16 @@
+@if (this.Character is not null)
+{
+    <div class="align-items-center border border-dark rounded p-5">
+        <h3>@Character.CharacterName</h3>
+        <b>Level @Character.CharacterLevel @Character.Species @Character.CharacterClass</b>
+        <br />
+        <a class="btn btn-light" href="/character-sheet/@Character.CharacterId">View</a>
+        <a class="btn btn-primary" href="/character-sheet/edit/@Character.CharacterId">Edit</a>
+        <a class="btn btn-danger" href="/delete/@Character.CharacterId">Delete</a>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Character? Character { get; set; }
+}

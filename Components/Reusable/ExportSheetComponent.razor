@@ -1,0 +1,58 @@
+﻿@rendermode InteractiveServer
+@inject IJSRuntime js
+@inject ITraitsRepository TraitsRepository
+
+@using System.Text.Json;
+
+<button @onclick="DownloadFileAsync">
+    Download Sheet As Json
+</button>
+
+<script>
+    function saveAsFile(filename, bytesBase64) {
+        var link = document.createElement('a');
+        link.download = filename;
+        link.href = "data:application/octet-stream;base64," + bytesBase64;
+        document.body.appendChild(link); // Needed for Firefox
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+@code {
+    [Parameter]
+    public required Character character { get; set; }
+
+    public static class FileUtil
+    {
+        public async static Task SaveAs(IJSRuntime js, string filename, byte[] data)
+        {
+            await js.InvokeAsync<object>(
+                "saveAsFile",
+                filename,
+                Convert.ToBase64String(data));
+        }
+    }
+    async void DownloadFileAsync()
+    {
+        var text = toString();
+        var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+
+        string jsonName = "";
+        string[] charname = character.CharacterName.Split(" ");
+        foreach (string word in charname)
+        {
+            jsonName += word;
+            jsonName += "_";
+        }
+        jsonName += "sheet.json";
+
+        await FileUtil.SaveAs(js, jsonName, bytes);
+    }
+
+    string toString()
+    {
+        string jsonString = JsonSerializer.Serialize(character);
+        return jsonString;
+    }
+}

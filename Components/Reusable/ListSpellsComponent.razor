@@ -1,0 +1,39 @@
+﻿@if ((spells is null || spells.Count == 0) && charId > 0)
+{
+    <p>This character has no spells yet.</p>
+}
+else if (spells is null || spells.Count == 0)
+{
+    <p>No spells to display.</p>
+}
+else
+{
+    @foreach (var spell in spells)
+    {
+        @if (currentArcana < spell.Cost)
+        {
+            <div class="border border-dark m-2 p-2 rounded bg-light">
+                <ListSpellsItemComponent spell="spell" del="del" charId="charId" admin="admin"></ListSpellsItemComponent>
+            </div>
+        } 
+        else
+        {
+            <div class="border border-dark m-2 p-2 rounded">
+                <ListSpellsItemComponent spell="spell" del="del" charId="charId" admin="admin"></ListSpellsItemComponent>
+            </div>
+        }
+    }
+}
+
+@code {
+    [Parameter]
+    public required List<Spell> spells { get; set; }
+    [Parameter]
+    public int charId { get; set; } = 0;
+    [Parameter]
+    public required bool del { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+    [CascadingParameter]
+    public int currentArcana { get; set; } = 100;
+}

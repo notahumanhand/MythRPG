@@ -1,0 +1,41 @@
+﻿@using MythRPG.Data;
+@inject AppData AppData
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">MythRPG</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            @if (AppData.user is not null)
+            {
+                <p class="text-light">Logged In: @AppData.user.Username</p>
+            }
+            else
+            {
+                <p class="text-light">Logged Out</p>
+            }
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+            <NavLink class="nav-link" href="/classes">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Classes
+            </NavLink>
+            <NavLink class="nav-link" href="/mythics">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Mythic Paths
+            </NavLink>
+            <NavLink class="nav-link" href="/traits">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Traits
+            </NavLink>
+            <NavLink class="nav-link" href="/spells">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Spells
+            </NavLink>
+        </div>
+    </nav>
+</div>
+

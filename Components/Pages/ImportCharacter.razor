@@ -1,0 +1,172 @@
+﻿@page "/import-character"
+
+@rendermode InteractiveServer
+@inject Data.AppData AppData
+@inject IUsersRepository UsersRepository;
+@inject ICharactersRepository CharactersRepository;
+@inject NavigationManager NavigationManager;
+
+<PageTitle>Mythmaven: Import Character</PageTitle>
+
+<h3>Import Character</h3>
+<br />
+<textarea @bind="CharacterInfo" class="form-control" />
+<button type="button" class="btn btn-success" @onclick="Load">Load</button>
+<br />
+<EditForm Model="character" FormName="formCharacter" OnValidSubmit="Create">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <div class="row">
+        <div class="col-md-7">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <InputText id="name" @bind-Value="character.CharacterName" class="form-control" readonly></InputText>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <div class="form-group">
+                <label for="level">Starting Level</label>
+                <InputNumber id="level" @bind-Value="character.CharacterLevel" class="form-control" readonly></InputNumber>
+                <ValidationMessage For="() => character.CharacterLevel"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="class">Class</label>
+                <InputSelect id="class" @bind-Value="character.CharacterClass" class="form-control" readonly>
+                    <ClassSelectOptionComponent></ClassSelectOptionComponent>
+                </InputSelect>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="might">Might</label>
+                <InputNumber id="might" @bind-Value="character.Might" class="form-control" readonly></InputNumber>
+                <ValidationMessage For="() => character.Might"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="agility">Agility</label>
+                <InputNumber id="agility" @bind-Value="character.Agility" class="form-control" readonly></InputNumber>
+                <ValidationMessage For="() => character.Agility"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="knowledge">Knowledge</label>
+                <InputNumber id="Knowledge" @bind-Value="character.Knowledge" class="form-control" readonly></InputNumber>
+                <ValidationMessage For="() => character.Knowledge"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="charisma">Charisma</label>
+                <InputNumber id="charisma" @bind-Value="character.Charisma" class="form-control" readonly></InputNumber>
+                <ValidationMessage For="() => character.Charisma"></ValidationMessage>
+            </div>
+        </div>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Import Character</button>
+    <a href="/" class="btn btn-primary">Cancel</a>
+</EditForm>
+<br />
+@if (error)
+{
+    <p class="alert alert-danger">Something went wrong. Please refresh the page and try again.</p>
+}
+
+@code {
+    [SupplyParameterFromForm]
+    private Character character { get; set; } = new Character();
+    private bool error = false;
+
+    private string CharacterInfo = "";
+
+    private void Create()
+    {
+        if (AppData.user is not null)
+        {
+            CharactersRepository.AddCharacter(character);
+            AppData.user.Characters.Add(character);
+            foreach (var c in AppData.user.Characters)
+            {
+                c.Traits = new List<Trait>();
+                c.Spells = new List<Spell>();
+            }
+            UsersRepository.UpdateUserCharacters(AppData.user.UserId, AppData.user.Characters);
+            int id = AppData.user.UserId;
+            AppData.user = UsersRepository.GetUserById(id);
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            error = true;
+        }
+    }
+    private void Load()
+    {
+        string str = CharacterInfo.Trim('{').Trim('}');
+        string[] strlist = str.Split(',');
+        foreach (string s in strlist)
+        {
+            string[] pair = s.Split(':');
+            string attr = pair[0].Trim().Trim('"');
+            string val = pair[1].Trim().Trim('"');
+            if (!val.Equals("null"))
+            {
+                switch (attr)
+                {
+                    case "CharacterName":
+                        character.CharacterName = val;
+                        break;
+                    case "CharacterLevel":
+                        character.CharacterLevel = int.Parse(val);
+                        break;
+                    case "CharacterClass":
+                        character.CharacterClass = val;
+                        break;
+                    case "MythicPath":
+                        character.MythicPath = val;
+                        break;
+                    case "Might":
+                        character.Might = int.Parse(val);
+                        break;
+                    case "Agility":
+                        character.Agility = int.Parse(val);
+                        break;
+                    case "Knowledge":
+                        character.Knowledge = int.Parse(val);
+                        break;
+                    case "Charisma":
+                        character.Charisma = int.Parse(val);
+                        break;
+                    case "Species":
+                        character.Species = val;
+                        break;
+                    case "PrimaryTrait":
+                        character.PrimaryTrait = val;
+                        break;
+                    case "SecondaryTrait":
+                        character.SecondaryTrait = val;
+                        break;
+                    case "TertiaryTrait":
+                        character.TertiaryTrait = val;
+                        break;
+                    case "Size":
+                        character.Size = val;
+                        break;
+                    case "Armour":
+                        character.Armour = val;
+                        break;
+                    case "Shield":
+                        character.Shield = bool.Parse(val);
+                        break;
+                }
+            }
+        }
+    }
+    
+}

@@ -1,0 +1,56 @@
+﻿@page "/manage/{UserId:int}"
+@rendermode InteractiveServer
+@inject Data.AppData AppData
+@inject IUsersRepository UsersRepository
+@inject ITraitsRepository TraitsRepository
+
+<PageTitle>Mythmaven: Edit Character</PageTitle>
+@if (AppData.user is not null && AppData.user.UserId == 1)
+{
+    @if (user is not null)
+    {
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" @bind="user.Username" class="form-control"></input>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="text" id="password" @bind="user.Password" class="form-control"></input>
+        </div>
+    }
+    @if (confirmText)
+    {
+        <p>Changes saved! <button type="button" class="btn btn-danger" @onclick="ClearAlert">X</button></p>
+    }
+    <button type="button" class="btn btn-success" @onclick="Update">Save Changes</button>
+    <a href="/accounts" class="btn btn-primary">Back</a>
+}
+else
+{
+    <p>You are not authorised to view this page.</p>
+}
+
+@code {
+    [Parameter]
+    public int UserId { get; set; }
+
+    private User? user;
+
+    private bool confirmText = false;
+
+    protected override void OnParametersSet()
+    {
+        user = UsersRepository.GetUserById(UserId);
+    }
+
+    void Update()
+    {
+        if (user is not null) UsersRepository.UpdateUser(UserId, user);
+        confirmText = true;
+    }
+    void ClearAlert()
+    {
+        confirmText = false;
+    }
+
+}

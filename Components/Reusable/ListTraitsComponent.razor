@@ -1,0 +1,90 @@
+﻿@inject ICharactersRepository CharactersRepository
+@inject ITraitsRepository TraitsRepository
+
+@if ((traits is null || traits.Count == 0) && charId > 0)
+{
+    <p>This character has no traits yet.</p>
+}
+else if (traits is null || traits.Count == 0)
+{
+    <p>No traits to display.</p>
+}
+else 
+{
+    @foreach (var trait in traits)
+    {
+        <div class="border border-dark m-2 p-2 rounded">
+            @if (del && charId > 0)
+            {
+                <div class="row">
+                    <div class="col-md-11">
+                        <h4>@trait.Name</h4>
+                        <br />
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger" @onclick="() => Remove(trait)">Delete</button>
+                    </div>
+                </div>
+            }
+            else if (admin)
+            {
+                <div class="row">
+                    <div class="col-md-11">
+                        <h4>@trait.Name</h4>
+                        <br />
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger" @onclick="() => Delete(trait)">Delete</button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <h4>@trait.Name</h4>
+                <br />
+            }
+            <div class="row">
+                <div class="col-md-4 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Source</b><br>
+                    @trait.Source
+                </div>
+                <div class="col-md-4 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Resource Cost</b><br>
+                    @trait.ResourceCost
+                </div>
+                <div class="col-md-4 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Action Cost</b><br>
+                    @trait.ActionCost
+                </div>
+            </div>
+            @if (bonuses)
+            {
+                <h5>Bonuses</h5>
+                <ListBonusesComponent bonuses="@trait.Bonuses" showId="false"></ListBonusesComponent>
+            }
+            <h5>Description</h5>
+            <p>@trait.Description</p>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public required List<Trait> traits { get; set; }
+    [Parameter]
+    public int charId { get; set; } = 0;
+    [Parameter]
+    public required bool del { get; set; }
+    [Parameter]
+    public required bool bonuses { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+    void Remove(Trait trait)
+    {
+        CharactersRepository.RemoveTrait(charId, trait.TraitId);
+    }
+    void Delete(Trait trait)
+    {
+        TraitsRepository.DeleteTrait(trait.TraitId);
+    }
+}

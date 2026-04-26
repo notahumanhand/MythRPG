@@ -1,0 +1,134 @@
+﻿@page "/spells"
+@rendermode InteractiveServer
+@inject Data.AppData AppData
+@inject ISpellsRepository SpellsRepository
+
+<h3>Spells</h3>
+
+@if (AppData.user is not null && AppData.user.UserId == 1)
+{
+    <ListSpellsComponent spells="spells" admin="true"></ListSpellsComponent>
+    <h4>Add Trait</h4>
+    <div class="border border-dark m-2 p-2 rounded">
+        <EditForm Model="spell" FormName="formSpell" OnValidSubmit="Create">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <InputText id="name" @bind-Value="spell.Name" class="form-control"></InputText>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="cost">Arcana Cost</label>
+                        <InputNumber id="cost" @bind-Value="spell.Cost" class="form-control"></InputNumber>
+                        <ValidationMessage For="() => spell.Cost"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="casting">Casting Time</label>
+                        <InputText id="casting" @bind-Value="spell.Casting" class="form-control"></InputText>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="colour">Colour</label>
+                        <InputText id="colour" @bind-Value="spell.Colour" class="form-control"></InputText>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="type">Type</label>
+                        <InputText id="type" @bind-Value="spell.Type" class="form-control"></InputText>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label for="duration">Duration</label>
+                        <InputText id="duration" @bind-Value="spell.Duration" class="form-control"></InputText>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label for="range">Range</label>
+                        <InputText id="range" @bind-Value="spell.Range" class="form-control"></InputText>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="type">Concentration</label>
+                        <br />
+                        <InputCheckbox id="type" @bind-Value="spell.Concentration"></InputCheckbox>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <InputTextArea id="description" @bind-Value="spell.Effect" class="form-control"></InputTextArea>
+            </div>
+            <br />
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+        <br />
+        <br />
+        <h4>@spell.Name</h4>
+        <div class="row">
+            <div class="col-md-1">
+                <b>Arcana Cost</b><br>
+                @spell.Cost
+            </div>
+            <div class="col-md-2">
+                <b>Casting Time</b><br>
+                @spell.Casting
+            </div>
+            <div class="col-md-2">
+                <b>Colour</b><br>
+                @spell.Colour
+            </div>
+            <div class="col-md-2">
+                <b>Type</b><br>
+                @spell.Type
+            </div>
+            <div class="col-md-2">
+                <b>Duration</b><br>
+                @spell.Duration
+            </div>
+            <div class="col-md-2">
+                <b>Range</b><br>
+                @spell.Range
+            </div>
+            @if (spell.Concentration is true)
+            {
+                <div class="col-md-1">
+                    <b>Concentration</b>
+                </div>
+            }
+        </div>
+        <h5>Effect</h5>
+        <p>@spell.Effect</p>
+    </div>
+}
+else
+{
+    <ListSpellsComponent spells="spells"></ListSpellsComponent>
+}
+
+@code {
+    [SupplyParameterFromForm]
+    private Spell spell { get; set; } = new Spell();
+
+    List<Spell> spells = new List<Spell>();
+    protected override void OnParametersSet()
+    {
+        spells = SpellsRepository.GetSpells();
+    }
+    private void Create()
+    {
+        SpellsRepository.AddSpell(spell);
+        spell = new Spell();
+    }
+}

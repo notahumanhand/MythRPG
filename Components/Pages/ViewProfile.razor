@@ -1,0 +1,59 @@
+﻿@using MythRPG.Data;
+@inject AppData AppData
+@inject NavigationManager NavigationManager
+@inject IUsersRepository UsersRepository
+@page "/profile"
+@rendermode InteractiveServer
+
+@if (AppData.user is not null)
+{
+    <h3>Profile: @AppData.user.Username</h3>
+    <div class="form-group">
+        <label for="username">Change Username</label>
+        <input type="text" id="username" @bind="newusername" class="form-control"></input>
+        <button type="button" class="btn btn-success" @onclick="UpdateUsername">Save</button>
+    </div>
+    <div class="form-group">
+        <p>Current theme: Default</p>
+        <label for="theme">Select Profile Theme</label>
+        <select id="theme">
+            <option value="Default">Default</option>
+            <option value="Bloodstains">Bloodstains</option>
+            <option value="Eternity">Eternity</option>
+            <option value="Flame">Flame</option>
+            <option value="Gilded">Gilded</option>
+            <option value="Ice Lichen">Ice Lichen</option>
+            <option value="Marshlands">Marshlands</option>
+            <option value="Righteous">Rightous</option>
+            <option value="Savannah">Savannah</option>
+            <option value="Whiteout">Whiteout</option>
+            <option value="Wooded">Wooded</option>
+        </select>
+        <button type="button" class="btn btn-success" @onclick="UpdateTheme">Save</button>
+    </div>
+    <br />
+    <br />
+    <button type="button" class="btn btn-danger" @onclick="Logout">Log Out</button>
+}
+
+@code {
+    private string newusername = "";
+    private void Logout()
+    {
+        AppData.user = null;
+        NavigationManager.NavigateTo("/login");
+    }
+    private void UpdateUsername()
+    {
+        if (AppData.user is not null)
+        {
+            AppData.user.Username = newusername;
+            UsersRepository.UpdateUser(AppData.user.UserId, AppData.user);
+            newusername = "";
+        }
+    }
+    private void UpdateTheme()
+    {
+        
+    }
+}

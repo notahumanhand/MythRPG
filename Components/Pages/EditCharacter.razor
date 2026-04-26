@@ -1,0 +1,209 @@
+﻿@page "/character-sheet/edit/{CharId:int}"
+@rendermode InteractiveServer
+
+@inject ICharactersRepository CharactersRepository
+@inject ITraitsRepository TraitsRepository
+@inject ISpellsRepository SpellsRepository
+
+<PageTitle>Mythmaven: Edit Character</PageTitle>
+
+<h2>Edit Character</h2>
+@if (this.character is not null)
+{
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" @bind="character.CharacterName" class="form-control"></input>
+    </div>
+    <div class="form-group">
+        <label for="level">Level</label>
+        <input type="number" min="1" max="20" id="level" @bind="character.CharacterLevel" class="form-control"></input>
+    </div>
+    <div class="form-group">
+        <label for="species">Species</label>
+        <input type="text" id="species" @bind="character.Species" class="form-control"></input>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="class">Class</label>
+                <select id="class" @bind="character.CharacterClass" class="form-control">
+                    <ClassSelectOptionComponent></ClassSelectOptionComponent>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="mythic">Mythic Path</label>
+                <select id="mythic" @bind="character.MythicPath" class="form-control">
+                    <MythicSelectOptionComponent></MythicSelectOptionComponent>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="might">Might</label>
+                <input type="number" min="0" max="5" id="might" @bind="character.Might" class="form-control"></input>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="agility">Agility</label>
+                <input type="number" id="agility" @bind="character.Agility" class="form-control"></input>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="knowledge">Knowledge</label>
+                <input type="number" min="0" max="5" id="knowledge" @bind="character.Knowledge" class="form-control"></input>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="charisma">Charisma</label>
+                <input type="number" min="0" max="5" id="charisma" @bind="character.Charisma" class="form-control"></input>
+            </div>
+        </div>
+    </div>
+    <br />
+    <br />
+    <div class="row">
+        <div class="col-md-4">
+            <label for="size">Size</label><br>
+            <select name="size" id="size" class="size fillable" @bind="character.Size">
+                <option value="medium">Medium</option>
+                <option value="small">Small</option>
+                <option value="large">Large</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="armour">Armour</label><br>
+            <select name="armour" id="armour" class="armour fillable" @bind="character.Armour">
+                <option value="unarmoured">Unarmoured</option>
+                <option value="light-armour">Light Armour</option>
+                <option value="medium-armour">Medium Armour</option>
+                <option value="heavy-armour">Heavy Armour</option>
+                <option value="light-robes">Light Robes</option>
+                <option value="medium-robes">Medium Robes</option>
+                <option value="heavy-robes">Heavy Robes</option>
+                <option value="hybrid-armour">Hybrid Armour</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="shield">Shield</label><br>
+            <input type="checkbox" id="shield" name="shield" value="1" @bind="character.Shield">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="primary-trait">Primary Trait</label><br>
+            <textarea id="primary-trait" name="primary-trait" rows="4" cols="50" class="fillable" @bind="character.PrimaryTrait"></textarea>
+        </div>
+        <div class="col-md-4">
+            <label for="secondary-trait">Secondary Trait</label><br>
+            <textarea id="secondary-trait" name="secondary-trait" rows="4" cols="50" class="fillable" @bind="character.SecondaryTrait"></textarea>
+        </div>
+        <div class="col-md-4">
+            <label for="tertiary-trait">Tertiary Trait</label><br>
+            <textarea id="tertiary-trait" name="tertiary-trait" rows="4" cols="50" class="fillable" @bind="character.TertiaryTrait"></textarea>
+        </div>
+    </div>
+    <br />
+    <br />
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Traits</h3>
+            <ListTraitsComponent traits="@character.Traits" charId="@character.CharacterId" bonuses="true" del="true"></ListTraitsComponent>
+            <h4>Add Trait</h4>
+            <div class="border border-dark m-2 p-2 rounded">
+                <select id="class" @bind="traitselected" class="form-control">
+                    <ListTraitOptionsComponent></ListTraitOptionsComponent>
+                </select>
+                <button type="button" class="btn btn-primary" @onclick="AddTrait">Add Trait</button>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h3>Spells</h3>
+            <p>Your Colours</p>
+            <ListSpellColoursComponent charclass="@character.CharacterClass"></ListSpellColoursComponent>
+            <ListSpellsComponent spells="@character.Spells" charId="@character.CharacterId" del="true"></ListSpellsComponent>
+            <h4>Add Spell</h4>
+            <div class="border border-dark m-2 p-2 rounded">
+                <select id="class" @bind="spellselected" class="form-control">
+                    <ListSpellOptionsComponent></ListSpellOptionsComponent>
+                </select>
+                <button type="button" class="btn btn-primary" @onclick="AddSpell">Add Spell</button>
+            </div>
+        </div>
+    </div>
+    
+    @if (confirmText)
+    {
+        <p class="alert alert-success">Changes saved! <button type="button" class="btn btn-danger" @onclick="ClearAlert">X</button></p>
+    }
+    <button type="button" class="btn btn-success" @onclick="Update">Save Changes</button>
+    <a href="/character-sheet/@CharId" class="btn btn-primary">View Character Sheet</a>
+    <a href="/" class="btn btn-primary">Return to Home</a>
+}
+
+@code {
+
+    [Parameter]
+    public int CharId { get; set; }
+
+    private Character character = new Character();
+    private List<Spell> spells = new();
+
+    private bool confirmText = false;
+
+    private string traitselected = "";
+    private bool confirmTraitText = false;
+    void AddTrait()
+    {
+        if (!String.IsNullOrWhiteSpace(traitselected))
+        {
+            Trait traitToAdd = TraitsRepository.GetTraitByName(traitselected);
+            if (traitToAdd is not null) TraitsRepository.AddTraitToCharacter(character.CharacterId, traitToAdd);
+            traitselected = "";
+            confirmTraitText = true;
+            character = CharactersRepository.GetCharacterById(CharId);
+        }
+    }
+    private string spellselected = "";
+    private bool confirmSpellText = false;
+    void AddSpell()
+    {
+        if (!String.IsNullOrWhiteSpace(spellselected))
+        {
+            Spell? spellToAdd = SpellsRepository.GetSpellByName(spellselected);
+            if (spellToAdd is not null) SpellsRepository.AddSpellToCharacter(character.CharacterId, spellToAdd);
+            spellselected = "";
+            confirmSpellText = true;
+            character = CharactersRepository.GetCharacterById(CharId);
+        }
+    }
+    protected override void OnParametersSet()
+    {
+        character = CharactersRepository.GetCharacterById(CharId);
+        List<Trait> charactertraits = new List<Trait>();
+        foreach (var trait in character.Traits)
+        {
+            Trait fullTrait = TraitsRepository.GetTraitBonusById(trait.TraitId);
+            charactertraits.Add(fullTrait);
+        }
+        character.Traits = charactertraits;
+    }
+    void Update()
+    {
+        CharactersRepository.UpdateCharacter(CharId, character);
+        confirmText = true;
+        character = CharactersRepository.GetCharacterById(CharId);
+    }
+    void ClearAlert()
+    {
+        confirmText = false;
+    }
+
+}

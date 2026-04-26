@@ -1,0 +1,222 @@
+﻿@page "/character-sheet/{CharId:int}"
+
+@inject ICharactersRepository CharactersRepository
+@inject ITraitsRepository TraitsRepository
+@rendermode InteractiveServer
+
+<PageTitle>Mythmaven: @character.CharacterName's Character Sheet</PageTitle>
+
+<div class="row">
+    <div class="col-md-10">
+        <h3>@character.CharacterName's Character Sheet</h3>
+    </div>
+    <div class="col-md-2">
+        <ExportSheetComponent character="character"></ExportSheetComponent>
+    </div>
+</div>
+
+
+@if (this.character is not null)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" @bind="character.CharacterName" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="species">Species</label>
+                <input type="text" id="species" @bind="character.Species" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <div class="form-group">
+                <label for="level">Level</label>
+                <input type="number" min="1" max="20" id="level" @bind="character.CharacterLevel" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <a class="btn btn-primary" href="/character-sheet/edit/@character.CharacterId">Edit Character</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="class">Class</label>
+                <input type="text" id="class" @bind="character.CharacterClass" class="form-control" readonly />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="mythic">Mythic Path</label>
+                <input type="text" id="mythic" @bind="character.MythicPath" class="form-control" readonly />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="might">Might</label>
+                <input type="number" id="might" @bind="character.Might" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="agility">Agility</label>
+                <input type="number" id="agility" @bind="character.Agility" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="knowledge">Knowledge</label>
+                <input type="number" id="knowledge" @bind="character.Knowledge" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="charisma">Charisma</label>
+                <input type="number" id="charisma" @bind="character.Charisma" class="form-control" readonly>
+            </div>
+        </div>
+    </div>
+    <br />
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="health">Health</label>
+                <input type="number" id="health" @bind="health" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="currenthealth">Current Health</label>
+                <input type="number" id="currenthealth" @bind="currentHealth" class="form-control" max="@health" min="0">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="prowess">Prowess</label>
+                <input type="number" id="prowess" @bind="prowess" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="currentprowess">Current Prowess</label>
+                <input type="number" id="currentprowess" @bind="currentProwess" class="form-control" max="@prowess" min="0">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="arcana">Arcana</label>
+                <input type="number" id="arcana" @bind="arcana" class="form-control" readonly>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="currentarcana">Current Arcana</label>
+                <input type="number" id="currentarcana" @bind="currentArcana" class="form-control" max="@arcana" min="0">
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-2">
+            <label for="size">Size</label><br>
+            <input type="text" id="size" class="form-control" @bind="character.Size" readonly />
+        </div>
+        <div class="col-md-2">
+            <label for="speed">Speed</label><br>
+            <input type="number" id="speed" name="speed" placeholder="6" class="form-control" @bind="speed" readonly>
+        </div>
+        <div class="col-md-2">
+            <label for="armour">Armour</label><br>
+            <input type="text" id="armour" class="form-control" @bind="character.Armour" readonly />
+        </div>
+        <div class="col-md-2">
+            <label for="shield">Shield</label><br>
+            @if (character.Shield is true)
+            {
+                <p>Yes</p>
+            }
+            else
+            {
+                <p>No</p>
+            }
+        </div>
+        <div class="col-md-2">
+            <label for="physical-defense">Physical Defense</label><br>
+            <input type="number" id="physical-defense" name="physical-defense" placeholder="2" class="form-control" @bind="physdef" readonly>
+        </div>
+        <div class="col-md-2">
+            <label for="magical-defense">Magical Defense</label><br>
+            <input type="number" id="magical-defense" name="magical-defense" placeholder="2" class="form-control" @bind="magdef" readonly>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="primary-trait">Primary Trait</label><br>
+            <textarea id="primary-trait" name="primary-trait" rows="4" cols="50" class="form-control" @bind="character.PrimaryTrait" readonly></textarea>
+        </div>
+        <div class="col-md-4">
+            <label for="secondary-trait">Secondary Trait</label><br>
+            <textarea id="secondary-trait" name="secondary-trait" rows="4" cols="50" class="form-control" @bind="character.SecondaryTrait" readonly></textarea>
+        </div>
+        <div class="col-md-4">
+            <label for="tertiary-trait">Tertiary Trait</label><br>
+            <textarea id="tertiary-trait" name="tertiary-trait" rows="4" cols="50" class="form-control" @bind="character.TertiaryTrait" readonly></textarea>
+        </div>
+    </div>
+    <br />
+    <br />
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Traits</h3>
+            <ListTraitsComponent traits="@character.Traits" charId="@character.CharacterId" bonuses="false" del="false"></ListTraitsComponent>
+        </div>
+        <div class="col-md-6">
+            <h3>Spells</h3>
+            <CascadingValue Value="currentArcana">
+                <ListSpellsComponent spells="@character.Spells" charId="@character.CharacterId" del="false"></ListSpellsComponent>
+            </CascadingValue>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int CharId { get; set; }
+
+    private Character character = new Character();
+    private int health = 0;
+    private int prowess = 0;
+    private int arcana = 0;
+    private int speed = 0;
+    private int physdef = 2;
+    private int magdef = 2;
+
+    private int currentHealth = 0;
+    private int currentProwess = 0;
+    private int currentArcana = 0;
+
+    protected override void OnParametersSet()
+    {
+        character = CharactersRepository.GetCharacterById(CharId);
+        List<Trait> charactertraits = new List<Trait>();
+        foreach (var trait in character.Traits)
+        {
+            Trait fullTrait = TraitsRepository.GetTraitBonusById(trait.TraitId);
+            charactertraits.Add(fullTrait);
+        }
+        character.Traits = charactertraits;
+
+        health = character.CalculateHealth();
+        prowess = character.CalculateProwess();
+        arcana = character.CalculateArcana();
+        currentHealth = health;
+        currentArcana = arcana;
+        currentProwess = prowess;
+    }
+}

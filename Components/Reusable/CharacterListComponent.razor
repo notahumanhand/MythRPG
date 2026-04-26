@@ -1,0 +1,14 @@
+﻿<div class="d-flex justify-content-around">
+    @if (characters is not null && characters.Count > 0)
+    {
+        foreach (var character in characters)
+        {
+            <CharacterListItemComponent Character="character"></CharacterListItemComponent>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public required List<Character> characters { get; set; }
+}

@@ -1,0 +1,131 @@
+﻿@page "/traits"
+@rendermode InteractiveServer
+@inject Data.AppData AppData
+@inject ITraitsRepository TraitsRepository
+
+<PageTitle>Mythmaven: Traits</PageTitle>
+
+<h3>All Traits</h3>
+@if (AppData.user is not null && AppData.user.UserId == 1)
+{
+    <ListTraitsComponent traits="traits" bonuses="true" admin="true"></ListTraitsComponent>
+    <h4>Add Trait</h4>
+    <div class="border border-dark m-2 p-2 rounded">
+        <EditForm Model="trait" FormName="formTrait" OnValidSubmit="Create">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <InputText id="name" @bind-Value="trait.Name" class="form-control"></InputText>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="rc">Resource Cost</label>
+                        <InputText id="rc" @bind-Value="trait.ResourceCost" class="form-control"></InputText>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ac">Action Cost</label>
+                        <InputText id="ac" @bind-Value="trait.ActionCost" class="form-control"></InputText>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="source">Source</label>
+                        <InputText id="source" @bind-Value="trait.Source" class="form-control"></InputText>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <InputTextArea id="description" @bind-Value="trait.Description" class="form-control"></InputTextArea>
+            </div>
+            <br />
+            <br />
+            <div class="form-group">
+                <h5><label for="addbonus">Add Bonus</label></h5>
+                <div class="row">
+                    <div class="col-md-11">
+                        <InputNumber id="addbonus" @bind-Value="addbonus" class="form-control"></InputNumber>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-success" @onclick="AddBonus">Add</button>
+                    </div>
+                </div>
+                <p style="font-weight: 700;">Selected: @SelectedBonus()</p>
+                <h6>Available Bonuses</h6>
+                <ListBonusesComponent bonuses="bonuses" showId="true"></ListBonusesComponent>
+            </div>
+            <br />
+            <br />
+            <h4>@trait.Name</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <b>Source</b><br>
+                    @trait.Source
+                </div>
+                <div class="col-md-4">
+                    <b>Resource Cost</b><br>
+                    @trait.ResourceCost
+                </div>
+                <div class="col-md-4">
+                    <b>Action Cost</b><br>
+                    @trait.ActionCost
+                </div>
+            </div>
+            <h5>Description</h5>
+            <p>@trait.Description</p>
+            <h5>Bonuses</h5>
+            <ListBonusesComponent bonuses="@trait.Bonuses" showId="false"></ListBonusesComponent>
+            <br />
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+    <div class="border border-dark m-2 p-2 rounded">
+        <CreateBonusComponent></CreateBonusComponent>
+    </div>
+}
+else
+{
+    <ListTraitsComponent traits="traits" bonuses="true"></ListTraitsComponent>
+}
+
+@code {
+    [SupplyParameterFromForm]
+    private Trait trait { get; set; } = new Trait();
+
+    List<Trait> traits = new List<Trait>();
+    int addbonus = 0;
+
+    List<Bonus> bonuses = new List<Bonus>();
+
+    protected override void OnParametersSet()
+    {
+        traits = TraitsRepository.GetTraits();
+        bonuses = TraitsRepository.GetBonuses();
+    }
+    private string SelectedBonus()
+    {
+        string str = "";
+        Bonus? bonus = TraitsRepository.GetBonusById(addbonus);
+        if (bonus is not null)
+        {
+            str = "+" + bonus.Amount + " " + bonus.Type + " bonus to " + bonus.Modifies;
+        }
+        else
+        {
+            str = "None";
+        }
+        return str;
+    }
+    private void AddBonus()
+    {
+        Bonus? bonus = TraitsRepository.GetBonusById(addbonus);
+        if (bonus is not null) trait.Bonuses.Add(bonus);
+    }
+    private void Create()
+    {
+        TraitsRepository.AddTrait(trait);
+        trait = new Trait();
+    }
+}

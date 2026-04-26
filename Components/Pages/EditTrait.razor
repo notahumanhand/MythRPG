@@ -1,0 +1,70 @@
+﻿@page "/trait/edit/{TraitId:int}"
+@rendermode InteractiveServer
+
+@inject ITraitsRepository TraitsRepository
+
+<PageTitle>Mythmaven: Edit Character</PageTitle>
+
+@if (trait is not null) 
+{
+    <div class="form-group">
+        <label for="name">Trait Name</label>
+        <input type="text" id="name" @bind="trait.Name" class="form-control"></input>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="source">Source</label>
+                <input type="text" id="source" @bind="trait.Source" class="form-control"></input>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="action">Action Cost</label>
+                <input type="text" id="action" @bind="trait.ActionCost" class="form-control"></input>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="resource">Resource Cost</label>
+                <input type="text" id="resource" @bind="trait.ResourceCost" class="form-control"></input>
+            </div>
+        </div>
+        <div class="col-md-4">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="desc">Description</label>
+        <input type="textarea" id="desc" @bind="trait.Description" class="form-control"></input>
+    </div>
+}
+@if (confirmText)
+{
+    <p>Changes saved! <button type="button" class="btn btn-danger" @onclick="ClearAlert">X</button></p>
+}
+<button type="button" class="btn btn-success" @onclick="Update">Save Changes</button>
+
+@code {
+    [Parameter]
+    public int TraitId { get; set; }
+
+    private Trait trait = new Trait();
+
+    private bool confirmText = false;
+
+    protected override void OnParametersSet()
+    {
+        trait = TraitsRepository.GetTraitById(TraitId);
+    }
+
+    void Update()
+    {
+        TraitsRepository.UpdateTrait(TraitId, trait);
+        confirmText = true;
+    }
+    void ClearAlert()
+    {
+        confirmText = false;
+    }
+
+}
