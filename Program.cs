@@ -43,9 +43,11 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddRazorPages();
-// Add services to the container.
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddTransient<ICharactersRepository, CharactersRepository>();
 builder.Services.AddTransient<ITraitsRepository, TraitsRepository>();
