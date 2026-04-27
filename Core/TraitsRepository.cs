@@ -5,26 +5,26 @@ namespace MythRPG.Core
 {
     public class TraitsRepository : ITraitsRepository
     {
-        private readonly IDbContextFactory<MythRPGContext> contextFactory;
-        public TraitsRepository(IDbContextFactory<MythRPGContext> contextFactory)
+        private readonly MythRPGContext contextFactory;
+        public TraitsRepository(MythRPGContext contextFactory)
         {
             this.contextFactory = contextFactory;
         }
         public void AddTrait(Trait trait)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             db.Traits.Add(trait);
             db.SaveChanges();
         }
         public void AddBonus (Bonus bonus)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             db.Bonuses.Add(bonus);
             db.SaveChanges();
         }
         public void AddTraitToCharacter(int charId, Trait trait)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var characterToUpdate = db.Characters.Find(charId);
             if (characterToUpdate is not null)
             {
@@ -34,29 +34,29 @@ namespace MythRPG.Core
         }
         public List<Trait> GetTraits()
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             return db.Traits.Include(e => e.Bonuses).ToList();
         }
         public List<Trait> ListTraits()
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             return db.Traits.ToList();
         }
         public List<Bonus> GetBonuses()
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             return db.Bonuses.ToList();
         }
         public Trait GetTraitById(int id)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var trait = db.Traits.Find(id);
             if (trait is not null)  return trait;
             return new Trait();
         }
         public Trait GetTraitBonusById(int id)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             List<Trait> traits = GetTraits();
             foreach (var trait in traits)
             {
@@ -66,14 +66,14 @@ namespace MythRPG.Core
         }
         public Bonus? GetBonusById(int id)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var bonus = db.Bonuses.Find(id);
             if (bonus is not null) return bonus;
             return null;
         }
         public Trait GetTraitByName(string name)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             List<Trait> traits = ListTraits();
             foreach (var trait in traits)
             {
@@ -83,7 +83,7 @@ namespace MythRPG.Core
         }
         public Trait GetTraitBonusByName(string name)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             List<Trait> traits = GetTraits();
             foreach (var trait in traits)
             {
@@ -95,7 +95,7 @@ namespace MythRPG.Core
         {
             if (trait == null) throw new ArgumentNullException(nameof(trait));
             if (id != trait.TraitId) return;
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var traitToUpdate = db.Traits.Find(id);
             if (traitToUpdate is not null)
             {
@@ -109,7 +109,7 @@ namespace MythRPG.Core
         }
         public void DeleteTrait(int id)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var trait = db.Traits.Find(id);
             if (trait is null) return;
             db.Traits.Remove(trait);

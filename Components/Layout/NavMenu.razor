@@ -1,5 +1,4 @@
-﻿@using MythRPG.Data;
-@inject AppData AppData
+﻿@using Microsoft.AspNetCore.Components.Authorization
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -12,14 +11,16 @@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            @if (AppData.user is not null)
-            {
-                <p class="text-light">Logged In: @AppData.user.Username</p>
-            }
-            else
-            {
-                <p class="text-light">Logged Out</p>
-            }
+            <AuthorizeView>
+                <Authorized>
+                    <p class="text-light">
+                        Logged In: @context.User.Identity?.Name
+                    </p>
+                </Authorized>
+                <NotAuthorized>
+                    <p class="text-light">Logged Out</p>
+                </NotAuthorized>
+            </AuthorizeView>
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
@@ -35,6 +36,15 @@
             <NavLink class="nav-link" href="/spells">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Spells
             </NavLink>
+            <AuthorizeView>
+                <Authorized>
+                    <div class="mt-auto px-3 pb-3">
+                        <form method="post" action="/logout" data-enhance="false">
+                            <button type="submit" class="btn btn-sm btn-outline-light w-100">Log Out</button>
+                        </form>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
         </div>
     </nav>
 </div>

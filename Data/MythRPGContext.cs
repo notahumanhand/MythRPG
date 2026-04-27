@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using MythRPG.Core;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace MythRPG.Data
 {
-    public class MythRPGContext : DbContext
+    public class MythRPGContext : IdentityDbContext<User>
     {
         public MythRPGContext(DbContextOptions<MythRPGContext> options): base(options)
         {
@@ -14,10 +15,10 @@ namespace MythRPG.Data
         public DbSet<Character> Characters { get; set; }
         public DbSet<Trait> Traits { get; set; }
         public DbSet<Bonus> Bonuses { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<Spell> Spells { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Character>().HasData(
                 new Character { CharacterId = 1, CharacterName = "Briar Elderose", CharacterClass = "Witch", CharacterLevel = 4 }
             );
@@ -85,22 +86,6 @@ namespace MythRPG.Data
                     Effect = "Choose a willing creature within range. They regain 1d8+C Health."
                 }
             );
-            modelBuilder.Entity<User>().HasData(
-                new User { UserId = 1, Username = "Spleen", Password = "KAajsw11&" },
-                new User { UserId = 2, Username = "Sean", Password = "GQtzkr79$" },
-                new User { UserId = 3, Username = "Chelsea", Password = "DTajej63*" },
-                new User { UserId = 4, Username = "Amarii", Password = "HGuxmk93~" },
-                new User { UserId = 5, Username = "Corn", Password = "MUdydn97%" },
-                new User { UserId = 6, Username = "Liz", Password = "OEnxmu56!" },
-                new User { UserId = 7, Username = "Daeni", Password = "RUlvyl12?" },
-                new User { UserId = 8, Username = "Kyle", Password = "PLrwgc94-" },
-                new User { UserId = 9, Username = "UGW", Password = "CXejuc08@" },
-                new User { UserId = 10, Username = "Kira", Password = "QIzkwj58^" },
-                new User { UserId = 11, Username = "Kat", Password = "VXqmze90+" }
-            );
-            modelBuilder.Entity<User>()
-                .HasMany(e => e.Characters)
-                .WithOne();
             modelBuilder.Entity<Character>()
                 .HasMany(e => e.Traits)
                 .WithMany();
@@ -110,7 +95,6 @@ namespace MythRPG.Data
             modelBuilder.Entity<Trait>()
                 .HasMany(e => e.Bonuses)
                 .WithMany();
-            //modelBuilder.Entity<User>().Navigation(e => e.Characters).AutoInclude();
             modelBuilder.Entity<Character>().Navigation(e => e.Traits).AutoInclude();
             modelBuilder.Entity<Character>().Navigation(e => e.Spells).AutoInclude();
             //modelBuilder.Entity<Trait>().Navigation(e => e.Bonuses).AutoInclude();

@@ -1,21 +1,18 @@
-﻿@page "/manage/{UserId:int}"
+﻿@page "/manage/{UserId}"
 @rendermode InteractiveServer
-@inject Data.AppData AppData
-@inject IUsersRepository UsersRepository
-@inject ITraitsRepository TraitsRepository
-
-<PageTitle>Mythmaven: Edit Character</PageTitle>
-@if (AppData.user is not null && AppData.user.UserId == 1)
-{
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject UserManager<User> UserManager
+@attribute [Authorize(Roles="Admin")]
+<AuthorizeView Roles="Admin">
+    <Authorized>
+<PageTitle>Mythmaven: Edit User</PageTitle>
     @if (user is not null)
     {
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" @bind="user.Username" class="form-control"></input>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="text" id="password" @bind="user.Password" class="form-control"></input>
+            <input type="text" id="username" @bind="user.UserName" class="form-control"></input>
         </div>
     }
     @if (confirmText)
@@ -24,29 +21,29 @@
     }
     <button type="button" class="btn btn-success" @onclick="Update">Save Changes</button>
     <a href="/accounts" class="btn btn-primary">Back</a>
-}
-else
-{
-    <p>You are not authorised to view this page.</p>
-}
+    </Authorized>
+</AuthorizeView>
 
 @code {
     [Parameter]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     private User? user;
 
     private bool confirmText = false;
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        user = UsersRepository.GetUserById(UserId);
+        user = await UserManager.FindByIdAsync(UserId);
     }
 
-    void Update()
+    private async Task Update()
     {
-        if (user is not null) UsersRepository.UpdateUser(UserId, user);
-        confirmText = true;
+        if (user is not null)
+        {
+            await UserManager.UpdateAsync(user);
+            confirmText = true;
+        }
     }
     void ClearAlert()
     {

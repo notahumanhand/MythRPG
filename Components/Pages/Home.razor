@@ -1,14 +1,15 @@
 ﻿@page "/"
-@inject Data.AppData AppData
-@inject IUsersRepository UsersRepository
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize]
 @inject ICharactersRepository CharactersRepository
-@rendermode InteractiveServer
 
 <PageTitle>Mythmaven: Home</PageTitle>
 
 <h1 class="title">Home</h1>
-@if (loggedIn)
-{
+<AuthorizeView>
+    <Authorized>
+
     <CharacterListComponent characters="characters"></CharacterListComponent>
     <br />
     <br />
@@ -17,28 +18,39 @@
     <br />
     <br />
     <a href="/profile" class="btn btn-primary">My Profile</a>
-    @if (AppData.user is not null && AppData.user.UserId == 1)
-    {
-        <a href="/accounts" class="btn btn-danger">Manage Accounts</a>
-    }
-}
-else
-{
-    <p>You are logged out.</p>
-    <a href="/login" class="btn btn-primary">Log In</a>
-}
+        <AuthorizeView Roles="Admin" Context="adminContext">
+            <Authorized>
+                <a href="/accounts" class="btn btn-danger">Manage Accounts</a>
+            </Authorized>
+        </AuthorizeView>
+    </Authorized>
+    <NotAuthorized>
+        <p>You are logged out.</p>
+        <a href="/login" class="btn btn-primary">Log In</a>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private List<Character>? characters;
     private bool loggedIn = false;
-    protected override void OnInitialized()
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; }
+    protected override async Task OnInitializedAsync()
     {
-        if (AppData.user is not null)
+        var authState = await AuthState;
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
         {
-            characters = AppData.user.Characters;
             loggedIn = true;
 
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId != null)
+            {
+                characters = CharactersRepository.GetCharactersByUserId(userId);
+            }
         }
     }
-    
+
 }

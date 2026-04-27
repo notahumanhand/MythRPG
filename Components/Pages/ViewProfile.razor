@@ -1,13 +1,14 @@
-﻿@using MythRPG.Data;
-@inject AppData AppData
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
 @inject NavigationManager NavigationManager
-@inject IUsersRepository UsersRepository
 @page "/profile"
 @rendermode InteractiveServer
 
-@if (AppData.user is not null)
-{
-    <h3>Profile: @AppData.user.Username</h3>
+<AuthorizeView>
+    <Authorized>
+        <h3>Profile: @context.User.Identity?.Name</h3>
     <div class="form-group">
         <label for="username">Change Username</label>
         <input type="text" id="username" @bind="newusername" class="form-control"></input>
@@ -31,25 +32,28 @@
         </select>
         <button type="button" class="btn btn-success" @onclick="UpdateTheme">Save</button>
     </div>
-    <br />
-    <br />
-    <button type="button" class="btn btn-danger" @onclick="Logout">Log Out</button>
-}
+    </Authorized>
+</AuthorizeView>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; }
     private string newusername = "";
-    private void Logout()
+    private async Task UpdateUsername()
     {
-        AppData.user = null;
-        NavigationManager.NavigateTo("/login");
-    }
-    private void UpdateUsername()
-    {
-        if (AppData.user is not null)
+        var authState = await AuthState;
+        var userPrincipal = authState.User;
+
+        if (userPrincipal.Identity?.IsAuthenticated == true)
         {
-            AppData.user.Username = newusername;
-            UsersRepository.UpdateUser(AppData.user.UserId, AppData.user);
-            newusername = "";
+            var user = await UserManager.GetUserAsync(userPrincipal);
+
+            if (user != null && !string.IsNullOrWhiteSpace(newusername))
+            {
+                user.UserName = newusername;
+                await UserManager.UpdateAsync(user);
+                newusername = "";
+            }
         }
     }
     private void UpdateTheme()

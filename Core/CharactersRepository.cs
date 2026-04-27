@@ -5,26 +5,26 @@ namespace MythRPG.Core
 {
     public class CharactersRepository : ICharactersRepository
     {
-        private readonly IDbContextFactory<MythRPGContext> contextFactory;
-        public CharactersRepository(IDbContextFactory<MythRPGContext> contextFactory)
+        private readonly MythRPGContext contextFactory;
+        public CharactersRepository(MythRPGContext contextFactory)
         {
             this.contextFactory = contextFactory;
         }
 
         public void AddCharacter(Character character)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             db.Characters.Add(character);
             db.SaveChanges();
         }
         public List<Character> GetCharacters()
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             return db.Characters.Include(e => e.Traits).ToList();
         }
         public List<Character> ListCharacters()
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             return db.Characters.ToList();
         }
         public Character GetCharacterById(int id)
@@ -38,20 +38,29 @@ namespace MythRPG.Core
         }
         public void DeleteCharacter(int id)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var character = db.Characters.Find(id);
             if (character is null) return;
             db.Characters.Remove(character);
             db.SaveChanges();
         }
+        public List<Character> GetCharactersByUserId(string userId)
+        {
+            var db = this.contextFactory;
+            return db.Characters
+                .Where(c => c.UserId == userId)
+                .Include(c => c.Traits)
+                .Include(c => c.Spells)
+                .ToList();
+        }
         public List<Character> SearchCharacters(string name)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             return db.Characters.ToList();
         }
         public List<Character> GetCharactersByClass(string charclass)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             List<Character> characters = GetCharacters();
             List<Character> classcharacters = new List<Character>();
             foreach (var character in characters)
@@ -64,7 +73,7 @@ namespace MythRPG.Core
         {
             if (character == null) throw new ArgumentNullException(nameof(character));
             if (id != character.CharacterId) return;
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var characterToUpdate = db.Characters.Find(id);
             if (characterToUpdate is not null)
             {
@@ -89,7 +98,7 @@ namespace MythRPG.Core
         }
         public void RemoveTrait(int CharId, int TraitId)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var characterToUpdate = db.Characters.Find(CharId);
             var traitToRemove = db.Traits.Find(TraitId);
             if (characterToUpdate is not null && traitToRemove is not null)
@@ -100,7 +109,7 @@ namespace MythRPG.Core
         }
         public void RemoveSpell(int CharId, int SpellId)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var characterToUpdate = db.Characters.Find(CharId);
             var spellToRemove = db.Spells.Find(SpellId);
             if (characterToUpdate is not null && spellToRemove is not null)
@@ -111,7 +120,7 @@ namespace MythRPG.Core
         }
         public void LevelUpCharacter(int id)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var character = db.Characters.Find(id);
             if (character is not null && character.CharacterLevel < 20) character.CharacterLevel += 1;
         }

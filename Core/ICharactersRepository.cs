@@ -8,6 +8,7 @@ namespace MythRPG.Core
         List<Character> GetCharacters();
         List<Character> ListCharacters();
         Character GetCharacterById(int id);
+        List<Character> GetCharactersByUserId(string userId);
         List<Character> GetCharactersByClass(string charclass);
         List<Character> SearchCharacters(string name);
         void UpdateCharacter(int id, Character character);
