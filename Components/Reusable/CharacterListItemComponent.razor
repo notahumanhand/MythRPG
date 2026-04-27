@@ -1,6 +1,7 @@
 @if (this.Character is not null)
 {
     <div class="align-items-center border border-dark rounded p-5">
+        <img src="@(Character.PortraitUrl ?? PortraitsRef.Default)" width="100" />
         <h3>@Character.CharacterName</h3>
         <b>Level @Character.CharacterLevel @Character.Species @Character.CharacterClass</b>
         <br />

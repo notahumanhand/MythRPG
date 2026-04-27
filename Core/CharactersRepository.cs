@@ -92,7 +92,7 @@ namespace MythRPG.Core
                 characterToUpdate.Size = character.Size;
                 characterToUpdate.Armour = character.Armour;
                 characterToUpdate.Shield = character.Shield;
-                //characterToUpdate.Traits = character.Traits;
+                characterToUpdate.PortraitUrl = character.PortraitUrl;
                 db.SaveChanges();
             }
         }

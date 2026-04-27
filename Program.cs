@@ -8,6 +8,7 @@ using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services
     .AddBlazorise(options =>
@@ -17,14 +18,15 @@ builder.Services
     .AddBootstrap5Providers()
     .AddFontAwesomeIcons();
 
-builder.Services.AddDbContext<MythRPGContext>(options =>
+builder.Services.AddDbContext<MythRPGContext>((serviceProvider, options) =>
 {
-options.UseSqlServer("Server=tcp:mythrpg-server.database.windows.net,1433;Initial Catalog=MythRPGDb;Persist Security Info=False;User ID=spleen;Password=GMilmc176;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
-        sqlServerOptionsAction: sqlOptions =>
-        {
-            sqlOptions.EnableRetryOnFailure(maxRetryCount:2);
-            sqlOptions.CommandTimeout(120);
-        });
+    var connectionString = builder.Configuration.GetConnectionString("MythRPG") ?? throw new Exception("Connection string 'MythRPG' not found.");
+    options.UseSqlServer(connectionString,
+            sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(maxRetryCount: 2);
+                sqlOptions.CommandTimeout(120);
+            });
 });
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -47,61 +49,14 @@ builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddTransient<ICharactersRepository, CharactersRepository>();
 builder.Services.AddTransient<ITraitsRepository, TraitsRepository>();
 builder.Services.AddTransient<ISpellsRepository, SpellsRepository>();
 
+builder.Services.AddApplicationInsightsTelemetry();
+
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<User>>();
-
-    if (!await roleManager.RoleExistsAsync("Admin"))
-    {
-        await roleManager.CreateAsync(new IdentityRole("Admin"));
-    }
-
-    string adminUsername = "spleen";
-    string adminPassword = "MMVkhld@87_";
-    string fauxUsername = "faux";
-    string fauxPassword = "MMVkdck@14&";
-
-    var adminUser = await userManager.FindByNameAsync(adminUsername);
-    var fauxUser = await userManager.FindByNameAsync(fauxUsername);
-
-    if (adminUser == null)
-    {
-        adminUser = new User { UserName = adminUsername };
-
-        var result = await userManager.CreateAsync(adminUser, adminPassword);
-
-        if (result.Succeeded)
-        {
-            await userManager.AddToRoleAsync(adminUser, "Admin");
-        }
-        else
-        {
-            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
-        }
-    }
-    if (fauxUser == null)
-    {
-        fauxUser = new User { UserName = fauxUsername };
-
-        var result = await userManager.CreateAsync(fauxUser, fauxPassword);
-
-        if (!result.Succeeded)
-        {
-            throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
-        }
-    }
-}
 
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
