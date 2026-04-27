@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Components.Authorization
 @inject UserManager<User> UserManager
+@inject ILogger<CharacterCreate> Logger
 @inject ICharactersRepository CharactersRepository;
 @inject NavigationManager NavigationManager;
 
@@ -81,6 +82,12 @@
                 character.Spells = new List<Spell>();
 
                 CharactersRepository.AddCharacter(character);
+
+                Logger.LogInformation(
+                    "USER_ACTION: User {Username} created character {CharacterId}",
+                    user.Identity?.Name,
+                    character.CharacterId
+                );
 
                 NavigationManager.NavigateTo("/");
             }
