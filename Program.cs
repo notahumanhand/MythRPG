@@ -6,6 +6,7 @@ using Blazorise;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Identity;
+using HealthChecks.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -49,6 +50,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddHealthChecks().AddSqlServer(builder.Configuration.GetConnectionString("MythRPG"));
 
 builder.Services.AddTransient<ICharactersRepository, CharactersRepository>();
 builder.Services.AddTransient<ITraitsRepository, TraitsRepository>();
@@ -77,6 +79,8 @@ app.UseAuthorization();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 app.MapRazorPages();
+
+app.MapHealthChecks("/health");
 
 app.MapPost("/login-post", async (HttpContext context, SignInManager<User> signInManager) =>
 {
