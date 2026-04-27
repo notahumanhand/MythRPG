@@ -168,7 +168,7 @@
 }
 
 @code {
-    private List<(string Name, string Url)> portraits = PortraitsRef.All;
+    private readonly List<(string Name, string Url)> portraits = PortraitsRef.All;
 
     [Parameter]
     public int CharId { get; set; }

@@ -9,10 +9,11 @@
 <AuthorizeView>
     <Authorized>
         <h3>Profile: @context.User.Identity?.Name</h3>
+        <img src="@(currentUser?.ProfilePictureUrl ?? PortraitsRef.Default)" width="100" />
     <div class="form-group">
         <label for="username">Change Username</label>
-        <input type="text" id="username" @bind="newusername" class="form-control"></input>
-        <button type="button" class="btn btn-success" @onclick="UpdateUsername">Save</button>
+        <input type="text" id="username" @bind="newusername" class="form-control" />
+        <button type="button" class="btn btn-success" @onclick="UpdateUsername">Save Username</button>
     </div>
     <div class="form-group">
         <p>Current theme: Default</p>
@@ -30,15 +31,45 @@
             <option value="Whiteout">Whiteout</option>
             <option value="Wooded">Wooded</option>
         </select>
-        <button type="button" class="btn btn-success" @onclick="UpdateTheme">Save</button>
+        <button type="button" class="btn btn-success" @onclick="UpdateTheme">Save Theme</button>
+    </div>
+    <div class="form-group">
+        <label>Select Profile Picture</label>
+        <select class="form-control" @bind="selectedPortrait">
+            @foreach (var p in portraits) 
+            {
+                <option value="@p.Url">@p.Name</option>
+            }
+        </select>
+        @if (!string.IsNullOrEmpty(selectedPortrait)) 
+        {
+            <img src="@selectedPortrait" width="100" class="mt-2" />
+        }
+        <button class="btn btn-success" @onclick="UpdateProfilePicture">Save Profile Picture</button>
     </div>
     </Authorized>
 </AuthorizeView>
 
 @code {
+    private readonly List<(string Name, string Url)> portraits = PortraitsRef.All;
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
+    private User? currentUser;
     private string newusername = "";
+    private string? selectedPortrait;
+    protected override async Task OnInitializedAsync() {
+        var authState = await AuthState;
+        var userPrincipal = authState.User;
+
+        if (userPrincipal.Identity?.IsAuthenticated == true) 
+        {
+            currentUser = await UserManager.GetUserAsync(userPrincipal);
+
+            if (currentUser != null) {
+                selectedPortrait = currentUser.ProfilePictureUrl ?? PortraitsRef.Default;
+            }
+        }
+    }
     private async Task UpdateUsername()
     {
         var authState = await AuthState;
@@ -58,6 +89,24 @@
     }
     private void UpdateTheme()
     {
-        
+
+    }
+    private async Task UpdateProfilePicture() 
+    {
+        var authState = await AuthState;
+        var userPrincipal = authState.User;
+
+        if (userPrincipal.Identity?.IsAuthenticated == true)
+        {
+            var user = await UserManager.GetUserAsync(userPrincipal);
+
+            if (user != null && !string.IsNullOrEmpty(selectedPortrait))
+            {
+                user.ProfilePictureUrl = selectedPortrait;
+                await UserManager.UpdateAsync(user);
+
+                currentUser = user;
+            }
+        }
     }
 }
