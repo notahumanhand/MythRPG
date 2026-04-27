@@ -1,8 +1,6 @@
 ﻿@page "/import-character"
-
 @rendermode InteractiveServer
-@inject Data.AppData AppData
-@inject IUsersRepository UsersRepository;
+@using Microsoft.AspNetCore.Components.Authorization
 @inject ICharactersRepository CharactersRepository;
 @inject NavigationManager NavigationManager;
 
@@ -79,31 +77,38 @@
 }
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; }
     [SupplyParameterFromForm]
     private Character character { get; set; } = new Character();
     private bool error = false;
 
     private string CharacterInfo = "";
 
-    private void Create()
+    private async Task Create()
     {
-        if (AppData.user is not null)
+        var authState = await AuthState;
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
         {
-            CharactersRepository.AddCharacter(character);
-            AppData.user.Characters.Add(character);
-            foreach (var c in AppData.user.Characters)
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId != null)
             {
-                c.Traits = new List<Trait>();
-                c.Spells = new List<Spell>();
+                character.UserId = userId;
+
+                character.Traits = new List<Trait>();
+                character.Spells = new List<Spell>();
+
+                CharactersRepository.AddCharacter(character);
+
+                NavigationManager.NavigateTo("/");
+            } 
+            else 
+            {
+                error = true;
             }
-            UsersRepository.UpdateUserCharacters(AppData.user.UserId, AppData.user.Characters);
-            int id = AppData.user.UserId;
-            AppData.user = UsersRepository.GetUserById(id);
-            NavigationManager.NavigateTo("/");
-        }
-        else
-        {
-            error = true;
         }
     }
     private void Load()

@@ -1,10 +1,9 @@
-﻿namespace MythRPG.Core
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace MythRPG.Core
 {
-    public class User
+    public class User : IdentityUser
     {
-        public int UserId { get; set; }
-        public required string Username { get; set; }
-        public required string Password { get; set; }
         public List<Character> Characters { get; set; } = new List<Character>();
     }
 }

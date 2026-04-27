@@ -5,20 +5,20 @@ namespace MythRPG.Core
 {
     public class SpellsRepository : ISpellsRepository
     {
-        private readonly IDbContextFactory<MythRPGContext> contextFactory;
-        public SpellsRepository(IDbContextFactory<MythRPGContext> contextFactory)
+        private readonly MythRPGContext contextFactory;
+        public SpellsRepository(MythRPGContext contextFactory)
         {
             this.contextFactory = contextFactory;
         }
         public void AddSpell(Spell spell)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             db.Spells.Add(spell);
             db.SaveChanges();
         }
         public void AddSpellToCharacter(int charId, Spell spell)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var characterToUpdate = db.Characters.Find(charId);
             if (characterToUpdate is not null)
             {
@@ -28,19 +28,19 @@ namespace MythRPG.Core
         }
         public List<Spell> GetSpells()
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             return db.Spells.ToList();
         }
         public Spell GetSpellById(int id)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var spell = db.Spells.Find(id);
             if (spell is not null) return spell;
             return new Spell();
         }
         public Spell? GetSpellByName(string name)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             List<Spell> spells = GetSpells();
             foreach (var spell in spells)
             {
@@ -52,7 +52,7 @@ namespace MythRPG.Core
         {
             if (spell == null) throw new ArgumentNullException(nameof(spell));
             if (id != spell.SpellId) return;
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var spellToUpdate = db.Spells.Find(id);
             if (spellToUpdate is not null)
             {
@@ -70,7 +70,7 @@ namespace MythRPG.Core
         }
         public void DeleteSpell(int id)
         {
-            using var db = this.contextFactory.CreateDbContext();
+            var db = this.contextFactory;
             var spell = db.Spells.Find(id);
             if (spell is null) return;
             db.Spells.Remove(spell);

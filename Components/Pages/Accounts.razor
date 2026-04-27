@@ -1,17 +1,20 @@
-﻿@inject Data.AppData AppData
-@inject IUsersRepository UsersRepository
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject UserManager<User> UserManager
+@attribute [Authorize(Roles = "Admin")]
 @page "/accounts"
 @rendermode InteractiveServer
 
-@if (AppData.user is not null && AppData.user.UserId == 1)
-{
+<AuthorizeView Roles="Admin">
+    <Authorized>
+
     <h3>Accounts</h3>
     <table class="table bg-transparent">
         <thead class="bg-transparent">
             <tr>
                 <th scope="col" class="bg-transparent">Id</th>
                 <th scope="col" class="bg-transparent">Username</th>
-                <th scope="col" class="bg-transparent">Password</th>
                 <th scope="col" class="bg-transparent">Characters</th>
                 <th scope="col" class="bg-transparent"></th>
                 <th scope="col" class="bg-transparent"></th>
@@ -21,9 +24,8 @@
             @foreach (var user in users)
             {
                 <tr>
-                    <th scope="row" class="bg-transparent">@user.UserId</th>
-                    <td class="bg-transparent">@user.Username</td>
-                    <td class="bg-transparent">@user.Password</td>
+                    <th scope="row" class="bg-transparent">@user.Id</th>
+                    <td class="bg-transparent">@user.UserName</td>
                     <td class="bg-transparent">
                         @foreach (var character in user.Characters)
                         {
@@ -31,20 +33,17 @@
                         }
                     </td>
                     <td class="bg-transparent">
-                        <a class="btn btn-primary" href="/manage/@user.UserId">Edit</a>
+                        <a class="btn btn-primary" href="/manage/@user.Id">Edit</a>
                     </td>
                     <td class="bg-transparent">
-                        <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(user.UserId)">Delete</button>
+                        <button type="button" class="btn btn-danger" @onclick="() => DeleteUser(user.Id)">Delete</button>
                     </td>
                 </tr>
             }
             <tr>
                 <th scope="row" class="bg-transparent">Add</th>
                 <td class="bg-transparent">
-                    <input type="text" id="username" @bind="newuser.Username" class="form-control"></input>
-                </td>
-                <td class="bg-transparent">
-                    <input type="text" id="password" @bind="newuser.Password" class="form-control"></input>
+                    <input type="text" id="username" @bind="newuser.UserName" class="form-control"></input>
                 </td>
                 <td class="bg-transparent">
                     <button type="button" class="btn btn-success" @onclick="AddUser">Save Changes</button>
@@ -55,50 +54,56 @@
                 <td class="bg-transparent">
                     <button type="button" class="btn btn-light" @onclick="Clear">Clear</button>
                 </td>
-                @code {
-
-                }
             </tr>
         </tbody>
-    </table>
-}
-else
-{
-    <p>You are not authorised to view this page.</p>
-}
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not authorized to view this page.</p>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     public List<User> users = new List<User>();
-    private User newuser = new User { Username = "", Password = "" };
+    private User newuser = new User { UserName = "" };
     private string text = "";
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
-        users = UsersRepository.GetUsers();
+        users = UserManager.Users.ToList();
     }
-    private void DeleteUser(int id)
+    private async Task DeleteUser(string id)
     {
-        UsersRepository.DeleteUser(id);
-        users = UsersRepository.GetUsers();
-    }
-    private void AddUser()
-    {
-        if (String.IsNullOrWhiteSpace(newuser.Username) || String.IsNullOrWhiteSpace(newuser.Username))
+        var user = await UserManager.FindByIdAsync(id);
+        if (user != null)
         {
-            text = "Add failed. Please ensure username and password are both filled in.";
+            await UserManager.DeleteAsync(user);
+            users = UserManager.Users.ToList();
+        }
+    }
+    private async void AddUser()
+    {
+        if (String.IsNullOrWhiteSpace(newuser.UserName) || String.IsNullOrWhiteSpace(newuser.UserName))
+        {
+            text = "Username required.";
         }
         else
         {
-            text = "User successfully added.";
-            UsersRepository.AddUser(newuser);
-            users = UsersRepository.GetUsers();
-            newuser.Username = "";
-            newuser.Password = "";
+            var result = await UserManager.CreateAsync(newuser, "Temp123!");
+            if (result.Succeeded)
+            {
+                text = "User created.";
+                users = UserManager.Users.ToList();
+                newuser = new User { UserName = "" };
+            }
+            else
+            {
+                text = "Error creating user.";
+            }
         }
     }
     private void Clear()
     {
-        newuser.Username = "";
-        newuser.Password = "";
+        newuser.UserName = "";
         text = "";
     }
 }

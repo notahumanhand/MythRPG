@@ -1,12 +1,11 @@
 ﻿@page "/spells"
 @rendermode InteractiveServer
-@inject Data.AppData AppData
+@using Microsoft.AspNetCore.Components.Authorization
 @inject ISpellsRepository SpellsRepository
 
 <h3>Spells</h3>
-
-@if (AppData.user is not null && AppData.user.UserId == 1)
-{
+<AuthorizeView Roles="Admin" Context="adminContext">
+    <Authorized>
     <ListSpellsComponent spells="spells" admin="true"></ListSpellsComponent>
     <h4>Add Trait</h4>
     <div class="border border-dark m-2 p-2 rounded">
@@ -111,11 +110,11 @@
         <h5>Effect</h5>
         <p>@spell.Effect</p>
     </div>
-}
-else
-{
+    </Authorized>
+    <NotAuthorized>
     <ListSpellsComponent spells="spells"></ListSpellsComponent>
-}
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [SupplyParameterFromForm]

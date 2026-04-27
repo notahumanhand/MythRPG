@@ -1,13 +1,13 @@
 ﻿@page "/traits"
 @rendermode InteractiveServer
-@inject Data.AppData AppData
+@using Microsoft.AspNetCore.Components.Authorization
 @inject ITraitsRepository TraitsRepository
 
 <PageTitle>Mythmaven: Traits</PageTitle>
 
 <h3>All Traits</h3>
-@if (AppData.user is not null && AppData.user.UserId == 1)
-{
+<AuthorizeView Roles="Admin" Context="adminContext">
+    <Authorized>
     <ListTraitsComponent traits="traits" bonuses="true" admin="true"></ListTraitsComponent>
     <h4>Add Trait</h4>
     <div class="border border-dark m-2 p-2 rounded">
@@ -84,11 +84,11 @@
     <div class="border border-dark m-2 p-2 rounded">
         <CreateBonusComponent></CreateBonusComponent>
     </div>
-}
-else
-{
-    <ListTraitsComponent traits="traits" bonuses="true"></ListTraitsComponent>
-}
+    </Authorized>
+    <NotAuthorized>
+        <ListTraitsComponent traits="traits" bonuses="true"></ListTraitsComponent>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     [SupplyParameterFromForm]
