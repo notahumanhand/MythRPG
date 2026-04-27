@@ -124,8 +124,15 @@ app.MapRazorPages();
 app.MapPost("/login-post", async (HttpContext context, SignInManager<User> signInManager) =>
 {
     var form = await context.Request.ReadFormAsync();
+
     var username = form["username"].FirstOrDefault();
     var password = form["password"].FirstOrDefault();
+
+    if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+    {
+        context.Response.Redirect("/login?error=true");
+        return;
+    }
 
     var userManager = signInManager.UserManager;
     var user = await userManager.FindByNameAsync(username);

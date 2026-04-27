@@ -62,7 +62,7 @@
     private Character character { get; set; } = new Character();
     private bool error = false;
     [CascadingParameter]
-    private Task<AuthenticationState> AuthState { get; set; }
+    private Task<AuthenticationState>? AuthState { get; set; }
 
     private async Task Create()
     {
