@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using HealthChecks.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services
