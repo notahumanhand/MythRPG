@@ -3,7 +3,6 @@
 @inject UserManager<User> UserManager
 @inject SignInManager<User> SignInManager
 @inject NavigationManager NavigationManager
-@inject ILogger<ViewProfile> Logger
 @page "/profile"
 @rendermode InteractiveServer
 
@@ -82,12 +81,8 @@
 
             if (user != null && !string.IsNullOrWhiteSpace(newusername))
             {
-                var oldUsername = user.UserName;
-
                 user.UserName = newusername;
                 await UserManager.UpdateAsync(user);
-
-                Logger.LogInformation("USER_ACTION: User {OldUsername} changed username to {NewUsername}", oldUsername, newusername);
 
                 newusername = "";
             }
@@ -110,8 +105,6 @@
             {
                 user.ProfilePictureUrl = selectedPortrait;
                 await UserManager.UpdateAsync(user);
-
-                Logger.LogInformation("User {User} updated profile picture", user.UserName);
 
                 currentUser = user;
             }

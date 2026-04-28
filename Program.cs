@@ -82,7 +82,7 @@ app.MapRazorPages();
 
 app.MapHealthChecks("/health");
 
-app.MapPost("/login-post", async (HttpContext context, SignInManager<User> signInManager, ILogger<Program> logger) =>
+app.MapPost("/login-post", async (HttpContext context, SignInManager<User> signInManager) =>
 {
     var form = await context.Request.ReadFormAsync();
 
@@ -91,7 +91,6 @@ app.MapPost("/login-post", async (HttpContext context, SignInManager<User> signI
 
     if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
     {
-        logger.LogWarning("USER_ACTION: Failed login attempt (missing credentials)");
         context.Response.Redirect("/login?error=true");
         return;
     }
@@ -101,7 +100,6 @@ app.MapPost("/login-post", async (HttpContext context, SignInManager<User> signI
 
     if (user == null)
     {
-        logger.LogWarning("USER_ACTION: Failed login attempt for username {Username} (user not found)", username);
         context.Response.Redirect("/login?error=nouser");
         return;
     }
@@ -110,7 +108,6 @@ app.MapPost("/login-post", async (HttpContext context, SignInManager<User> signI
 
     if (!passwordValid)
     {
-        logger.LogWarning("USER_ACTION: Failed login attempt for username {Username} (bad password)", username);
         context.Response.Redirect("/login?error=badpassword");
         return;
     }
@@ -119,21 +116,15 @@ app.MapPost("/login-post", async (HttpContext context, SignInManager<User> signI
 
     if (result.Succeeded)
     {
-        logger.LogInformation("USER_ACTION: User {Username} logged in", username);
         context.Response.Redirect("/");
     }
     else
     {
-        logger.LogWarning("USER_ACTION: Failed login attempt for username {Username} (something went wrong)", username);
         context.Response.Redirect("/login?error=true");
     }
 });
-app.MapPost("/logout", async (HttpContext context, SignInManager<User> signInManager, ILogger<Program> logger) =>
+app.MapPost("/logout", async (HttpContext context, SignInManager<User> signInManager) =>
 {
-    var username = context.User.Identity?.Name ?? "UNKNOWN";
-
-    logger.LogInformation("USER_ACTION: User {Username} logged out", username);
-
     await signInManager.SignOutAsync();
     context.Response.Redirect("/login");
 });
