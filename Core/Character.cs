@@ -9,6 +9,7 @@ namespace MythRPG.Core
         public int CharacterId { get; set; }
 
         public string? UserId { get; set; }
+        public bool IsPublic { get; set; }
         public string CharacterName { get; set; } = string.Empty;
 
         [Range(1, 20, ErrorMessage = "Class must be between 1 and 20.")]

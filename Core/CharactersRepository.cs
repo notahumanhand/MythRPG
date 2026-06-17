@@ -20,7 +20,17 @@ namespace MythRPG.Core
         public List<Character> GetCharacters()
         {
             var db = this.contextFactory;
-            return db.Characters.Include(e => e.Traits).ToList();
+            return db.Characters.Include(e => e.Traits).Include(c => c.Spells).ToList();
+        }
+        public List<Character> GetPublicCharacters()
+        {
+            var db = this.contextFactory;
+
+            return db.Characters
+                .Where(c => c.IsPublic)
+                .Include(c => c.Traits)
+                .Include(c => c.Spells)
+                .ToList();
         }
         public List<Character> ListCharacters()
         {

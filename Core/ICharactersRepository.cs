@@ -6,6 +6,7 @@ namespace MythRPG.Core
         void AddCharacter(Character character);
         void DeleteCharacter(int id);
         List<Character> GetCharacters();
+        List<Character> GetPublicCharacters();
         List<Character> ListCharacters();
         Character GetCharacterById(int id);
         List<Character> GetCharactersByUserId(string userId);
