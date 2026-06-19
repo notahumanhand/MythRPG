@@ -69,44 +69,6 @@ var app = builder.Build();
         app.UseHsts();
     }
 
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider
-        .GetRequiredService<RoleManager<IdentityRole>>();
-
-    if (!await roleManager.RoleExistsAsync("Spectator"))
-    {
-        await roleManager.CreateAsync(
-            new IdentityRole("Spectator"));
-    }
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var userManager =
-        scope.ServiceProvider
-            .GetRequiredService<UserManager<User>>();
-
-    var spectator =
-        await userManager.FindByNameAsync("Spectator");
-
-    if (spectator == null)
-    {
-        spectator = new User
-        {
-            UserName = "Spectator"
-        };
-
-        await userManager.CreateAsync(
-            spectator,
-            "Spectator123!");
-
-        await userManager.AddToRoleAsync(
-            spectator,
-            "Spectator");
-    }
-}
-
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();

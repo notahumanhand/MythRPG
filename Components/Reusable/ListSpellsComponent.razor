@@ -17,7 +17,8 @@ else
             mode == TraitsSpellsDisplayMode.CharacterSheet &&
             currentArcana < spell.Cost;
 
-        <div class="border border-dark m-2 p-2 rounded @(insufficientArcana ? "bg-light" : "")">
+        <div class="border border-dark m-2 p-2 rounded @(insufficientArcana ? "bg-light" : "")"
+             style="border-left: 8px solid @GetSpellColor(spell.Colour) !important;">
 
             @if (mode == TraitsSpellsDisplayMode.CharacterEdit)
             {
@@ -133,6 +134,23 @@ else
 
     [CascadingParameter]
     public int currentArcana { get; set; } = 100;
+
+    private string GetSpellColor(string? colour)
+    {
+        return colour?.ToLower() switch
+        {
+            "black" => "#121214",
+            "white" => "#FFFFFF",
+            "red" => "#7D1616",
+            "orange" => "#DF4200",
+            "gold" => "#E08500",
+            "green" => "#2F4931",
+            "blue" => "#3169D9",
+            "purple" => "#971EA4",
+            "brown" => "#4E3526",
+            _ => "#121214"
+        };
+    }
 
     void Remove(Spell spell)
     {

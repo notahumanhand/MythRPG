@@ -1,10 +1,12 @@
 @if (this.Character is not null)
 {
     <div class="align-items-center border border-dark rounded p-5">
-        <img src="@(Character.PortraitUrl ?? PortraitsRef.Default)" width="100" />
+        @if (!IsSpectator)
+        {
+            <img src="@(Character.PortraitUrl ?? PortraitsRef.Default)" width="100" />
+        }
         @if (IsSpectator && !string.IsNullOrEmpty(Character.UserId))
         {
-            <br />
             <small class="text-muted">@UserNames.GetValueOrDefault(Character.UserId, "Unknown")</small>
             <br />
         }
