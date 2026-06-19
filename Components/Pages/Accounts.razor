@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@inject IUsersRepository UsersRepository
 @inject UserManager<User> UserManager
 @attribute [Authorize(Roles = "Admin")]
 @page "/accounts"
@@ -27,10 +28,7 @@
                     <th scope="row" class="bg-transparent">@user.Id</th>
                     <td class="bg-transparent">@user.UserName</td>
                     <td class="bg-transparent">
-                        @foreach (var character in user.Characters)
-                        {
-                            <p>@character.CharacterName</p>
-                        }
+                        @string.Join(", ", user.Characters.Select(c => c.CharacterName))
                     </td>
                     <td class="bg-transparent">
                         <a class="btn btn-primary" href="/manage/@user.Id">Edit</a>
@@ -40,21 +38,6 @@
                     </td>
                 </tr>
             }
-            <tr>
-                <th scope="row" class="bg-transparent">Add</th>
-                <td class="bg-transparent">
-                    <input type="text" id="username" @bind="newuser.UserName" class="form-control"></input>
-                </td>
-                <td class="bg-transparent">
-                    <button type="button" class="btn btn-success" @onclick="AddUser">Save Changes</button>
-                </td>
-                <td class="bg-transparent">
-                    @text
-                </td>
-                <td class="bg-transparent">
-                    <button type="button" class="btn btn-light" @onclick="Clear">Clear</button>
-                </td>
-            </tr>
         </tbody>
         </table>
     </Authorized>
@@ -69,7 +52,7 @@
     private string text = "";
     protected override void OnInitialized()
     {
-        users = UserManager.Users.ToList();
+        users = UsersRepository.GetUsers();
     }
     private async Task DeleteUser(string id)
     {
@@ -77,28 +60,7 @@
         if (user != null)
         {
             await UserManager.DeleteAsync(user);
-            users = UserManager.Users.ToList();
-        }
-    }
-    private async void AddUser()
-    {
-        if (String.IsNullOrWhiteSpace(newuser.UserName) || String.IsNullOrWhiteSpace(newuser.UserName))
-        {
-            text = "Username required.";
-        }
-        else
-        {
-            var result = await UserManager.CreateAsync(newuser, "Temp123!");
-            if (result.Succeeded)
-            {
-                text = "User created.";
-                users = UserManager.Users.ToList();
-                newuser = new User { UserName = "" };
-            }
-            else
-            {
-                text = "Error creating user.";
-            }
+            users = UsersRepository.GetUsers();
         }
     }
     private void Clear()

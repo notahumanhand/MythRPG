@@ -56,6 +56,7 @@ builder.Services.AddHealthChecks().AddSqlServer(builder.Configuration.GetConnect
 builder.Services.AddTransient<ICharactersRepository, CharactersRepository>();
 builder.Services.AddTransient<ITraitsRepository, TraitsRepository>();
 builder.Services.AddTransient<ISpellsRepository, SpellsRepository>();
+builder.Services.AddTransient<IUsersRepository, UsersRepository>();
 
 builder.Services.AddApplicationInsightsTelemetry();
 
