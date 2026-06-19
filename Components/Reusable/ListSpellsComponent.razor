@@ -1,4 +1,7 @@
-﻿@if ((spells is null || spells.Count == 0) && charId > 0)
+﻿@inject ICharactersRepository CharactersRepository
+@inject ISpellsRepository SpellsRepository
+
+@if ((spells is null || spells.Count == 0) && charId > 0)
 {
     <p>This character has no spells yet.</p>
 }
@@ -10,30 +13,138 @@ else
 {
     @foreach (var spell in spells)
     {
-        @if (currentArcana < spell.Cost)
-        {
-            <div class="border border-dark m-2 p-2 rounded bg-light">
-                <ListSpellsItemComponent spell="spell" del="del" charId="charId" admin="admin"></ListSpellsItemComponent>
+        bool insufficientArcana =
+            mode == TraitsSpellsDisplayMode.CharacterSheet &&
+            currentArcana < spell.Cost;
+
+        <div class="border border-dark m-2 p-2 rounded @(insufficientArcana ? "bg-light" : "")">
+
+            @if (mode == TraitsSpellsDisplayMode.CharacterEdit)
+            {
+                <div class="row">
+                    <div class="col-md-11">
+                        <h4>@spell.Name</h4>
+                        <br />
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button"
+                                class="btn btn-danger"
+                                @onclick="() => Remove(spell)">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            }
+            else if (mode == TraitsSpellsDisplayMode.AdminView)
+            {
+                <div class="row">
+                    <div class="col-md-10">
+                        <h4>@spell.Name</h4>
+                        <br />
+                    </div>
+
+                    <div class="col-md-1">
+                        <a class="btn btn-primary"
+                           href="/spell/edit/@spell.SpellId">
+                            Edit
+                        </a>
+                    </div>
+
+                    <div class="col-md-1">
+                        <button type="button"
+                                class="btn btn-danger"
+                                @onclick="() => Delete(spell)">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <h4>@spell.Name</h4>
+                <br />
+            }
+
+            <div class="row">
+                <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Arcana Cost</b><br>
+                    @spell.Cost
+                </div>
+
+                <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Casting Time</b><br>
+                    @spell.Casting
+                </div>
+
+                <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Colour</b><br>
+                    @spell.Colour
+                </div>
+
+                <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Type</b><br>
+                    @spell.Type
+                </div>
+
+                <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Duration</b><br>
+                    @spell.Duration
+                </div>
+
+                <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
+                    <b>Range</b><br>
+                    @spell.Range
+                </div>
             </div>
-        } 
-        else
-        {
-            <div class="border border-dark m-2 p-2 rounded">
-                <ListSpellsItemComponent spell="spell" del="del" charId="charId" admin="admin"></ListSpellsItemComponent>
-            </div>
-        }
+
+            @if (spell.Concentration is true)
+            {
+                <div class="row">
+                    <div class="col-md-10">
+                        <h5>Effect</h5>
+                        <p>@spell.Effect</p>
+                    </div>
+                    <div class="col-md-2">
+                        <br />
+                        <b>Concentration</b>
+                    </div>
+                </div>
+            } 
+            else
+            {
+                <h5>Effect</h5>
+                <p>@spell.Effect</p>
+            }
+            
+
+        </div>
     }
 }
 
 @code {
     [Parameter]
     public required List<Spell> spells { get; set; }
+
     [Parameter]
     public int charId { get; set; } = 0;
+
     [Parameter]
-    public required bool del { get; set; }
-    [Parameter]
-    public bool admin { get; set; } = false;
+    public required TraitsSpellsDisplayMode mode { get; set; }
+
     [CascadingParameter]
     public int currentArcana { get; set; } = 100;
+
+    void Remove(Spell spell)
+    {
+        CharactersRepository.RemoveSpell(charId, spell.SpellId);
+    }
+
+    void Delete(Spell spell)
+    {
+        SpellsRepository.DeleteSpell(spell.SpellId);
+
+        spells.Remove(spell);
+
+        StateHasChanged();
+    }
 }

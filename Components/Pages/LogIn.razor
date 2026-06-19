@@ -19,12 +19,38 @@
     <br />
     <button type="submit" class="btn btn-success">Log In</button>
 </form>
+<form method="post"
+      action="/spectator-login"
+      data-enhance="false">
+
+    <button type="submit"
+            class="btn btn-secondary">
+        Continue as Spectator
+    </button>
+
+</form>
 @if (NavigationManager.Uri.Contains("error=true")) 
 {
     <p class="alert alert-danger">Login failed! Please try again.</p>
 }
 
 @code {
+    /*
+    private async Task LoginAsSpectator()
+    {
+        var spectator =
+            await UserManager.FindByNameAsync("Spectator");
+
+        if (spectator != null)
+        {
+            await SignInManager.SignInAsync(
+                spectator,
+                isPersistent: false);
+
+            NavigationManager.NavigateTo("/");
+        }
+    }
+    */
     /*
     private string username = "";
     private string password = "";

@@ -3,7 +3,7 @@
     {
         foreach (var character in characters)
         {
-            <CharacterListItemComponent Character="character"></CharacterListItemComponent>
+            <CharacterListItemComponent Character="character" IsSpectator="IsSpectator" UserNames="UserNames"></CharacterListItemComponent>
         }
     }
 </div>
@@ -11,4 +11,9 @@
 @code {
     [Parameter]
     public required List<Character> characters { get; set; }
+    [Parameter]
+    public bool IsSpectator { get; set; }
+    [Parameter]
+    public Dictionary<string, string> UserNames
+    { get; set; } = new();
 }

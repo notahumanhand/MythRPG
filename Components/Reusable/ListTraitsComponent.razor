@@ -14,7 +14,7 @@ else
     @foreach (var trait in traits)
     {
         <div class="border border-dark m-2 p-2 rounded">
-            @if (del && charId > 0)
+            @if (mode == TraitsSpellsDisplayMode.CharacterEdit)
             {
                 <div class="row">
                     <div class="col-md-11">
@@ -22,16 +22,19 @@ else
                         <br />
                     </div>
                     <div class="col-md-1">
-                        <button type="button" class="btn btn-danger" @onclick="() => Remove(trait)">Delete</button>
+                        <button type="button" class="btn btn-danger" @onclick="() => Remove(trait)">Remove</button>
                     </div>
                 </div>
             }
-            else if (admin)
+            else if (mode == TraitsSpellsDisplayMode.AdminView)
             {
                 <div class="row">
-                    <div class="col-md-11">
+                    <div class="col-md-10">
                         <h4>@trait.Name</h4>
                         <br />
+                    </div>
+                    <div class="col-md-1">
+                        <a class="btn btn-primary" href="/trait/edit/@trait.TraitId">Edit</a>
                     </div>
                     <div class="col-md-1">
                         <button type="button" class="btn btn-danger" @onclick="() => Delete(trait)">Delete</button>
@@ -74,11 +77,9 @@ else
     [Parameter]
     public int charId { get; set; } = 0;
     [Parameter]
-    public required bool del { get; set; }
-    [Parameter]
     public required bool bonuses { get; set; }
     [Parameter]
-    public bool admin { get; set; } = false;
+    public required TraitsSpellsDisplayMode mode { get; set; }
     void Remove(Trait trait)
     {
         CharactersRepository.RemoveTrait(charId, trait.TraitId);
@@ -86,5 +87,9 @@ else
     void Delete(Trait trait)
     {
         TraitsRepository.DeleteTrait(trait.TraitId);
+
+        traits.Remove(trait);
+
+        StateHasChanged();
     }
 }

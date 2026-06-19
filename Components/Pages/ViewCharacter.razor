@@ -1,5 +1,10 @@
 ﻿@page "/character-sheet/{CharId:int}"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<User> UserManager
+@inject NavigationManager NavigationManager
 @inject ICharactersRepository CharactersRepository
 @inject ITraitsRepository TraitsRepository
 @rendermode InteractiveServer
@@ -16,7 +21,7 @@
 </div>
 
 
-@if (this.character is not null)
+@if (PageReady && this.character is not null)
 {
     <div class="row">
         <div class="col-md-6">
@@ -31,15 +36,27 @@
                 <input type="text" id="species" @bind="character.Species" class="form-control" readonly>
             </div>
         </div>
-        <div class="col-md-1">
-            <div class="form-group">
-                <label for="level">Level</label>
-                <input type="number" min="1" max="20" id="level" @bind="character.CharacterLevel" class="form-control" readonly>
+        @if (CanEdit)
+        {
+            <div class="col-md-1">
+                <div class="form-group">
+                    <label for="level">Level</label>
+                    <input type="number" min="1" max="20" id="level" @bind="character.CharacterLevel" class="form-control" readonly>
+                </div>
             </div>
-        </div>
-        <div class="col-md-1">
-            <a class="btn btn-primary" href="/character-sheet/edit/@character.CharacterId">Edit Character</a>
-        </div>
+            <div class="col-md-1">
+                <a class="btn btn-primary" href="/character-sheet/edit/@character.CharacterId">Edit Character</a>
+            </div>
+        }
+        else
+        {
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="level">Level</label>
+                    <input type="number" min="1" max="20" id="level" @bind="character.CharacterLevel" class="form-control" readonly>
+                </div>
+            </div>
+        }
     </div>
     <div class="row">
         <div class="col-md-6">
@@ -174,12 +191,12 @@
     <div class="row">
         <div class="col-md-6">
             <h3>Traits</h3>
-            <ListTraitsComponent traits="@character.Traits" charId="@character.CharacterId" bonuses="false" del="false"></ListTraitsComponent>
+            <ListTraitsComponent traits="@character.Traits" charId="@character.CharacterId" bonuses="false" mode="TraitsSpellsDisplayMode.CharacterSheet"></ListTraitsComponent>
         </div>
         <div class="col-md-6">
             <h3>Spells</h3>
             <CascadingValue Value="currentArcana">
-                <ListSpellsComponent spells="@character.Spells" charId="@character.CharacterId" del="false"></ListSpellsComponent>
+                <ListSpellsComponent spells="@character.Spells" mode="TraitsSpellsDisplayMode.CharacterSheet"></ListSpellsComponent>
             </CascadingValue>
         </div>
     </div>
@@ -188,6 +205,9 @@
 @code {
     [Parameter]
     public int CharId { get; set; }
+
+    private bool CanEdit;
+    private bool PageReady = false;
 
     private Character character = new Character();
     private int health = 0;
@@ -201,22 +221,50 @@
     private int currentProwess = 0;
     private int currentArcana = 0;
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUser = await UserManager.GetUserAsync(authState.User);
+
+        if (currentUser == null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
         character = CharactersRepository.GetCharacterById(CharId);
-        List<Trait> charactertraits = new List<Trait>();
+
+        bool isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
+        bool isOwner = character.UserId == currentUser.Id;
+        bool canView = character.IsPublic || isOwner || isAdmin;
+        if (!canView)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        CanEdit = isOwner || isAdmin;
+
+        List<Trait> charactertraits = new();
+
         foreach (var trait in character.Traits)
         {
-            Trait fullTrait = TraitsRepository.GetTraitBonusById(trait.TraitId);
+            Trait fullTrait =
+                TraitsRepository.GetTraitBonusById(
+                    trait.TraitId);
+
             charactertraits.Add(fullTrait);
         }
+
         character.Traits = charactertraits;
 
         health = character.CalculateHealth();
         prowess = character.CalculateProwess();
         arcana = character.CalculateArcana();
+
         currentHealth = health;
         currentArcana = arcana;
         currentProwess = prowess;
+
+        PageReady = true;
     }
 }

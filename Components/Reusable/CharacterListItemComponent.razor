@@ -2,16 +2,30 @@
 {
     <div class="align-items-center border border-dark rounded p-5">
         <img src="@(Character.PortraitUrl ?? PortraitsRef.Default)" width="100" />
+        @if (IsSpectator && !string.IsNullOrEmpty(Character.UserId))
+        {
+            <br />
+            <small class="text-muted">@UserNames.GetValueOrDefault(Character.UserId, "Unknown")</small>
+            <br />
+        }
         <h3>@Character.CharacterName</h3>
         <b>Level @Character.CharacterLevel @Character.Species @Character.CharacterClass</b>
         <br />
         <a class="btn btn-light" href="/character-sheet/@Character.CharacterId">View</a>
+        @if (!IsSpectator)
+        {
         <a class="btn btn-primary" href="/character-sheet/edit/@Character.CharacterId">Edit</a>
         <a class="btn btn-danger" href="/delete/@Character.CharacterId">Delete</a>
+        }
     </div>
 }
 
 @code {
     [Parameter]
     public Character? Character { get; set; }
+    [Parameter]
+    public bool IsSpectator { get; set; }
+    [Parameter]
+    public Dictionary<string, string> UserNames
+    { get; set; } = new();
 }

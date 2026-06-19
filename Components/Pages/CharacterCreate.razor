@@ -1,6 +1,8 @@
 ﻿@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 @inject UserManager<User> UserManager
 @inject ICharactersRepository CharactersRepository;
 @inject NavigationManager NavigationManager;
@@ -9,6 +11,8 @@
 
 <PageTitle>Mythmaven: Create Character</PageTitle>
 
+@if (PageReady)
+{
 <h3>Create Character</h3>
 <br />
 
@@ -56,14 +60,34 @@
 {
     <p class="alert alert-danger">Something went wrong. Please refresh the page and try again.</p>
 }
+}
 
 @code {
     [SupplyParameterFromForm]
     private Character character { get; set; } = new Character();
     private bool error = false;
+    private bool PageReady = false;
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
 
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        if (user.IsInRole("Spectator"))
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        PageReady = true;
+    }
     private async Task Create()
     {
         var authState = await AuthState;

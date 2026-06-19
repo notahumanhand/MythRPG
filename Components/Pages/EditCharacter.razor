@@ -1,5 +1,11 @@
 ﻿@page "/character-sheet/edit/{CharId:int}"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<User> UserManager
+@inject NavigationManager NavigationManager
 @inject ICharactersRepository CharactersRepository
 @inject ITraitsRepository TraitsRepository
 @inject ISpellsRepository SpellsRepository
@@ -7,7 +13,7 @@
 <PageTitle>Mythmaven: Edit Character</PageTitle>
 
 <h2>Edit Character</h2>
-@if (this.character is not null)
+@if (PageReady && this.character is not null)
 {
     
     <div class="row">
@@ -25,7 +31,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <div class="form-group">
                 <label for="species">Species</label>
                 <input type="text" id="species" @bind="character.Species" class="form-control"></input>
@@ -40,6 +46,10 @@
                     <option value="@p.Url">@p.Name</option>
                 }
             </select>
+        </div>
+        <div class="col-md-2">
+            <label>Make this character publicly viewable</label>
+            <input type="checkbox" @bind="character.IsPublic" /> 
         </div>
     </div>
     <div class="row">
@@ -134,7 +144,7 @@
     <div class="row">
         <div class="col-md-6">
             <h3>Traits</h3>
-            <ListTraitsComponent traits="@character.Traits" charId="@character.CharacterId" bonuses="true" del="true"></ListTraitsComponent>
+            <ListTraitsComponent traits="@character.Traits" charId="@character.CharacterId" bonuses="true" mode="TraitsSpellsDisplayMode.CharacterEdit"></ListTraitsComponent>
             <h4>Add Trait</h4>
             <div class="border border-dark m-2 p-2 rounded">
                 <select id="class" @bind="traitselected" class="form-control">
@@ -147,7 +157,7 @@
             <h3>Spells</h3>
             <p>Your Colours</p>
             <ListSpellColoursComponent charclass="@character.CharacterClass"></ListSpellColoursComponent>
-            <ListSpellsComponent spells="@character.Spells" charId="@character.CharacterId" del="true"></ListSpellsComponent>
+            <ListSpellsComponent spells="@character.Spells" charId="@character.CharacterId" mode="TraitsSpellsDisplayMode.CharacterEdit"></ListSpellsComponent>
             <h4>Add Spell</h4>
             <div class="border border-dark m-2 p-2 rounded">
                 <select id="class" @bind="spellselected" class="form-control">
@@ -165,6 +175,7 @@
     <button type="button" class="btn btn-success" @onclick="Update">Save Changes</button>
     <a href="/character-sheet/@CharId" class="btn btn-primary">View Character Sheet</a>
     <a href="/" class="btn btn-primary">Return to Home</a>
+    <a class="btn btn-danger" href="/delete/@CharId">Delete Character</a>
 }
 
 @code {
@@ -177,11 +188,86 @@
     private List<Spell> spells = new();
 
     private bool confirmText = false;
+    private bool AuthorizedEditor = false;
+    private bool PageReady = false;
 
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider
+                .GetAuthenticationStateAsync();
+
+        var currentUser =
+            await UserManager.GetUserAsync(authState.User);
+
+        if (currentUser == null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        character =
+            CharactersRepository.GetCharacterById(CharId);
+
+        bool isAdmin =
+            await UserManager.IsInRoleAsync(
+                currentUser,
+                "Admin");
+
+        bool isOwner =
+            character.UserId == currentUser.Id;
+
+        AuthorizedEditor =
+            isOwner || isAdmin;
+
+        if (!AuthorizedEditor)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        List<Trait> charactertraits = new();
+
+        foreach (var trait in character.Traits)
+        {
+            Trait fullTrait =
+                TraitsRepository.GetTraitBonusById(
+                    trait.TraitId);
+
+            charactertraits.Add(fullTrait);
+        }
+
+        character.Traits = charactertraits;
+
+        PageReady = true;
+    }
+
+    void Update()
+    {
+        if (!AuthorizedEditor)
+        {
+            return;
+        }
+        CharactersRepository.UpdateCharacter(CharId, character);
+        confirmText = true;
+        character = CharactersRepository.GetCharacterById(CharId);
+    }
+    void ClearAlert()
+    {
+        if (!AuthorizedEditor)
+        {
+            return;
+        }
+        confirmText = false;
+    }
     private string traitselected = "";
     private bool confirmTraitText = false;
     void AddTrait()
     {
+        if (!AuthorizedEditor)
+        {
+            return;
+        }
         if (!String.IsNullOrWhiteSpace(traitselected))
         {
             Trait traitToAdd = TraitsRepository.GetTraitByName(traitselected);
@@ -195,6 +281,10 @@
     private bool confirmSpellText = false;
     void AddSpell()
     {
+        if (!AuthorizedEditor)
+        {
+            return;
+        }
         if (!String.IsNullOrWhiteSpace(spellselected))
         {
             Spell? spellToAdd = SpellsRepository.GetSpellByName(spellselected);
@@ -203,27 +293,6 @@
             confirmSpellText = true;
             character = CharactersRepository.GetCharacterById(CharId);
         }
-    }
-    protected override void OnParametersSet()
-    {
-        character = CharactersRepository.GetCharacterById(CharId);
-        List<Trait> charactertraits = new List<Trait>();
-        foreach (var trait in character.Traits)
-        {
-            Trait fullTrait = TraitsRepository.GetTraitBonusById(trait.TraitId);
-            charactertraits.Add(fullTrait);
-        }
-        character.Traits = charactertraits;
-    }
-    void Update()
-    {
-        CharactersRepository.UpdateCharacter(CharId, character);
-        confirmText = true;
-        character = CharactersRepository.GetCharacterById(CharId);
-    }
-    void ClearAlert()
-    {
-        confirmText = false;
     }
 
 }

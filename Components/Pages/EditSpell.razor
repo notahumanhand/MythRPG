@@ -1,0 +1,190 @@
+﻿@page "/spell/edit/{SpellId:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject ISpellsRepository SpellsRepository
+
+<PageTitle>Mythmaven: Edit Spell</PageTitle>
+
+@if (spell is not null)
+{
+    <div class="form-group">
+        <label for="name">Spell Name</label>
+        <input type="text"
+               id="name"
+               @bind="spell.Name"
+               class="form-control">
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="cost">Arcana Cost</label>
+                <input type="number"
+                       min="0"
+                       max="20"
+                       id="cost"
+                       @bind="spell.Cost"
+                       class="form-control">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="casting">Casting Time</label>
+                <select id="casting"
+                        @bind="spell.Casting"
+                        class="form-control">
+                    <option>Basic Action</option>
+                    <option>Swift Action</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="colour">Colour</label>
+                <select id="colour"
+                        @bind="spell.Colour"
+                        class="form-control">
+                    <option>Black</option>
+                    <option>White</option>
+                    <option>Red</option>
+                    <option>Orange</option>
+                    <option>Gold</option>
+                    <option>Green</option>
+                    <option>Blue</option>
+                    <option>Purple</option>
+                    <option>Brown</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="type">Type</label>
+                <select id="type"
+                        @bind="spell.Type"
+                        class="form-control">
+                    <option>Attack</option>
+                    <option>Buff</option>
+                    <option>Control</option>
+                    <option>Creation</option>
+                    <option>Debuff</option>
+                    <option>Detection</option>
+                    <option>Healing</option>
+                    <option>Illusion</option>
+                    <option>Protection</option>
+                    <option>Teleportation</option>
+                    <option>Utility</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="form-group">
+                <label for="duration">Duration</label>
+                <select id="duration"
+                        @bind="spell.Duration"
+                        class="form-control">
+                    <option>Instant</option>
+                    <option>Turn</option>
+                    <option>Round</option>
+                    <option>Encounter</option>
+                    <option>Day</option>
+                    <option>Indefinite</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="form-group">
+                <label for="range">Range</label>
+                <select id="range"
+                        @bind="spell.Range"
+                        class="form-control">
+                    <option>Self</option>
+                    <option>Melee</option>
+                    <option>Close</option>
+                    <option>Short</option>
+                    <option>Long</option>
+                    <option>Extreme</option>
+                    <option>Absurd</option>
+                    <option>N/A</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="form-group">
+                <label for="concentration">Concentration</label>
+                <br />
+                <input type="checkbox"
+                       id="concentration"
+                       @bind="spell.Concentration">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="effect">Effect</label>
+        <textarea id="effect"
+                  @bind="spell.Effect"
+                  class="form-control">
+            </textarea>
+    </div>
+}
+
+@if (confirmText)
+{
+    <p>
+        Changes saved!
+        <button type="button"
+                class="btn btn-danger"
+                @onclick="ClearAlert">
+            X
+        </button>
+    </p>
+}
+
+<button type="button"
+        class="btn btn-success"
+        @onclick="Update">
+    Save Changes
+</button>
+
+<a class="btn btn-primary"
+   href="/spells">
+    Return to Spells
+</a>
+
+@code {
+    [Parameter]
+    public int SpellId { get; set; }
+
+    private Spell spell = new Spell();
+
+    private bool confirmText = false;
+
+    protected override void OnParametersSet()
+    {
+        spell = SpellsRepository.GetSpellById(SpellId);
+    }
+
+    void Update()
+    {
+        SpellsRepository.UpdateSpell(SpellId, spell);
+        confirmText = true;
+    }
+
+    void ClearAlert()
+    {
+        confirmText = false;
+    }
+}

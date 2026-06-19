@@ -1,9 +1,10 @@
 ﻿@page "/trait/edit/{TraitId:int}"
 @rendermode InteractiveServer
-
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
 @inject ITraitsRepository TraitsRepository
 
-<PageTitle>Mythmaven: Edit Character</PageTitle>
+<PageTitle>Mythmaven: Edit Trait</PageTitle>
 
 @if (trait is not null) 
 {
@@ -43,6 +44,7 @@
     <p>Changes saved! <button type="button" class="btn btn-danger" @onclick="ClearAlert">X</button></p>
 }
 <button type="button" class="btn btn-success" @onclick="Update">Save Changes</button>
+<a class="btn btn-primary" href="/traits">Return to Traits</a>
 
 @code {
     [Parameter]

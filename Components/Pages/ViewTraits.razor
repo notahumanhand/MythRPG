@@ -8,7 +8,7 @@
 <h3>All Traits</h3>
 <AuthorizeView Roles="Admin" Context="adminContext">
     <Authorized>
-    <ListTraitsComponent traits="traits" bonuses="true" admin="true"></ListTraitsComponent>
+        <ListTraitsComponent traits="traits" bonuses="true" mode="TraitsSpellsDisplayMode.AdminView"></ListTraitsComponent>
     <h4>Add Trait</h4>
     <div class="border border-dark m-2 p-2 rounded">
         <EditForm Model="trait" FormName="formTrait" OnValidSubmit="Create">
@@ -86,7 +86,7 @@
     </div>
     </Authorized>
     <NotAuthorized>
-        <ListTraitsComponent traits="traits" bonuses="true"></ListTraitsComponent>
+        <ListTraitsComponent traits="traits" bonuses="true" mode="TraitsSpellsDisplayMode.Display"></ListTraitsComponent>
     </NotAuthorized>
 </AuthorizeView>
 

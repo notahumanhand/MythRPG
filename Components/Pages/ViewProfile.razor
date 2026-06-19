@@ -65,8 +65,22 @@
         {
             currentUser = await UserManager.GetUserAsync(userPrincipal);
 
-            if (currentUser != null) {
-                selectedPortrait = currentUser.ProfilePictureUrl ?? PortraitsRef.Default;
+            if (currentUser != null)
+            {
+                bool isSpectator =
+                    await UserManager.IsInRoleAsync(
+                        currentUser,
+                        "Spectator");
+
+                if (isSpectator)
+                {
+                    NavigationManager.NavigateTo("/");
+                    return;
+                }
+
+                selectedPortrait =
+                    currentUser.ProfilePictureUrl
+                    ?? PortraitsRef.Default;
             }
         }
     }

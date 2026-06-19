@@ -87,6 +87,7 @@ namespace MythRPG.Core
             var characterToUpdate = db.Characters.Find(id);
             if (characterToUpdate is not null)
             {
+                characterToUpdate.IsPublic = character.IsPublic;
                 characterToUpdate.CharacterClass = character.CharacterClass;
                 characterToUpdate.CharacterLevel = character.CharacterLevel;
                 characterToUpdate.CharacterName = character.CharacterName;

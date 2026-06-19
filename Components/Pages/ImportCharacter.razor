@@ -1,11 +1,14 @@
 ﻿@page "/import-character"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 @inject ICharactersRepository CharactersRepository;
 @inject NavigationManager NavigationManager;
 
 <PageTitle>Mythmaven: Import Character</PageTitle>
-
+@if (PageReady)
+{
 <h3>Import Character</h3>
 <br />
 <textarea @bind="CharacterInfo" class="form-control" />
@@ -71,9 +74,10 @@
     <a href="/" class="btn btn-primary">Cancel</a>
 </EditForm>
 <br />
-@if (error)
-{
+    @if (error)
+    {
     <p class="alert alert-danger">Something went wrong. Please refresh the page and try again.</p>
+    }
 }
 
 @code {
@@ -82,8 +86,29 @@
     [SupplyParameterFromForm]
     private Character character { get; set; } = new Character();
     private bool error = false;
+    private bool PageReady = false;
 
     private string CharacterInfo = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        if (user.IsInRole("Spectator"))
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        PageReady = true;
+    }
 
     private async Task Create()
     {

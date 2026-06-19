@@ -1,24 +1,59 @@
 ﻿@page "/delete/{charId:int}"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<User> UserManager
+@inject NavigationManager NavigationManager
 @inject ICharactersRepository CharactersRepository
-@inject NavigationManager NavigationManager;
 
 <PageTitle>Confirm Delete</PageTitle>
-
-<h1>Are you sure you want to delete @character.CharacterName?</h1>
-
-<button type="button" class="btn btn-danger" onclick="@(() => Delete())">Yes, delete my character</button>
+@if (PageReady && character is not null)
+{
+    <h1>Are you sure you want to delete @character.CharacterName?</h1>
+    <button type="button" class="btn btn-danger" @onclick="Delete">Yes, delete my character</button>
+    <a href="/character-sheet/@CharId" class="btn btn-secondary">Cancel</a>
+}
 
 @code {
     [Parameter]
     public int CharId { get; set; }
     private Character character = new Character();
-    protected override void OnParametersSet()
+    private bool AuthorizedEditor;
+    private bool PageReady = false;
+    protected override async Task OnParametersSetAsync()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var currentUser = await UserManager.GetUserAsync(authState.User);
+
+        if (currentUser == null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
         character = CharactersRepository.GetCharacterById(CharId);
+
+        bool isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
+        bool isOwner = character.UserId == currentUser.Id;
+        AuthorizedEditor = isOwner || isAdmin;
+
+        if (!AuthorizedEditor)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        PageReady = true;
     }
     void Delete()
     {
+        if (!AuthorizedEditor)
+        {
+            return;
+        }
         CharactersRepository.DeleteCharacter(CharId);
         NavigationManager.NavigateTo("/");
     }

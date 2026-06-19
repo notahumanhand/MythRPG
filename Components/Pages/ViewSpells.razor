@@ -6,8 +6,8 @@
 <h3>Spells</h3>
 <AuthorizeView Roles="Admin" Context="adminContext">
     <Authorized>
-    <ListSpellsComponent spells="spells" admin="true"></ListSpellsComponent>
-    <h4>Add Trait</h4>
+        <ListSpellsComponent spells="spells" mode="TraitsSpellsDisplayMode.AdminView"></ListSpellsComponent>
+    <h4>Add Spell</h4>
     <div class="border border-dark m-2 p-2 rounded">
         <EditForm Model="spell" FormName="formSpell" OnValidSubmit="Create">
             <DataAnnotationsValidator></DataAnnotationsValidator>
@@ -19,14 +19,17 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="cost">Arcana Cost</label>
-                        <InputNumber id="cost" @bind-Value="spell.Cost" class="form-control"></InputNumber>
+                            <InputNumber id="cost" min="0" max="20" @bind-Value="spell.Cost" class="form-control"></InputNumber>
                         <ValidationMessage For="() => spell.Cost"></ValidationMessage>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="casting">Casting Time</label>
-                        <InputText id="casting" @bind-Value="spell.Casting" class="form-control"></InputText>
+                            <InputSelect id="casting" @bind-Value="spell.Casting" class="form-control">
+                                <option>Basic Action</option>
+                                <option>Swift Action</option>
+                            </InputSelect>
                     </div>
                 </div>
             </div>
@@ -34,13 +37,35 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="colour">Colour</label>
-                        <InputText id="colour" @bind-Value="spell.Colour" class="form-control"></InputText>
+                            <InputSelect id="colour" @bind-Value="spell.Colour" class="form-control">
+                                <option>Black</option>
+                                <option>White</option>
+                                <option>Red</option>
+                                <option>Orange</option>
+                                <option>Gold</option>
+                                <option>Green</option>
+                                <option>Blue</option>
+                                <option>Purple</option>
+                                <option>Brown</option>
+                            </InputSelect>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="type">Type</label>
-                        <InputText id="type" @bind-Value="spell.Type" class="form-control"></InputText>
+                            <InputSelect id="type" @bind-Value="spell.Type" class="form-control">
+                                <option>Attack</option>
+                                <option>Buff</option>
+                                <option>Control</option>
+                                <option>Creation</option>
+                                <option>Debuff</option>
+                                <option>Detection</option>
+                                <option>Healing</option>
+                                <option>Illusion</option>
+                                <option>Protection</option>
+                                <option>Teleportation</option>
+                                <option>Utility</option>
+                            </InputSelect>
                     </div>
                 </div>
             </div>
@@ -48,13 +73,29 @@
                 <div class="col-md-5">
                     <div class="form-group">
                         <label for="duration">Duration</label>
-                        <InputText id="duration" @bind-Value="spell.Duration" class="form-control"></InputText>
+                            <InputSelect id="duration" @bind-Value="spell.Duration" class="form-control">
+                                <option>Instant</option>
+                                <option>Turn</option>
+                                <option>Round</option>
+                                <option>Encounter</option>
+                                <option>Day</option>
+                                <option>Indefinite</option>
+                            </InputSelect>
                     </div>
                 </div>
                 <div class="col-md-5">
                     <div class="form-group">
                         <label for="range">Range</label>
-                        <InputText id="range" @bind-Value="spell.Range" class="form-control"></InputText>
+                            <InputSelect id="range" @bind-Value="spell.Range" class="form-control">
+                                <option>Self</option>
+                                <option>Melee</option>
+                                <option>Close</option>
+                                <option>Short</option>
+                                <option>Long</option>
+                                <option>Extreme</option>
+                                <option>Absurd</option>
+                                <option>N/A</option>
+                            </InputSelect>
                     </div>
                 </div>
                 <div class="col-md-2">
@@ -112,7 +153,7 @@
     </div>
     </Authorized>
     <NotAuthorized>
-    <ListSpellsComponent spells="spells"></ListSpellsComponent>
+        <ListSpellsComponent spells="spells" mode="TraitsSpellsDisplayMode.Display"></ListSpellsComponent>
     </NotAuthorized>
 </AuthorizeView>
 

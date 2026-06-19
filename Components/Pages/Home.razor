@@ -1,7 +1,9 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @attribute [Authorize]
+@inject UserManager<User> UserManager
 @inject ICharactersRepository CharactersRepository
 
 <PageTitle>Mythmaven: Home</PageTitle>
@@ -9,15 +11,49 @@
 <h1 class="title">Mythmaven: Home</h1>
 <AuthorizeView>
     <Authorized>
+        @if (IsSpectator)
+        {
+            <h2>Public Characters</h2>
+        }
+        else
+        {
+            <h2>Your Characters</h2>
+        }
+        <CharacterListComponent characters="characters" IsSpectator="IsSpectator" UserNames="UserNames"></CharacterListComponent>
+        <br />
+        <br />
+        <AuthorizeView Roles="Admin" Context="adminContext">
+            <Authorized>
+                @if (allCharacters is not null)
+                {
+                    <hr />
+                    <h3>All Characters</h3>
+                    <CharacterListComponent characters="allCharacters" IsSpectator="true" UserNames="UserNames"></CharacterListComponent>
+                }
+            </Authorized>
+        </AuthorizeView>
+        <br />
+        <br />
+        @if (!IsSpectator)
+        {
+            <a href="/create-character"
+               class="btn btn-success">
+                Create Character
+            </a>
 
-    <CharacterListComponent characters="characters"></CharacterListComponent>
-    <br />
-    <br />
-    <a href="/create-character" class="btn btn-success">Create Character</a>
-    <a href="/import-character" class="btn btn-primary">Import Character</a>
-    <br />
-    <br />
-    <a href="/profile" class="btn btn-primary">My Profile</a>
+            <a href="/import-character"
+               class="btn btn-primary">
+                Import Character
+            </a>
+
+            <br />
+            <br />
+
+            <a href="/profile"
+               class="btn btn-primary">
+                My Profile
+            </a>
+        }
         <AuthorizeView Roles="Admin" Context="adminContext">
             <Authorized>
                 <a href="/accounts" class="btn btn-danger">Manage Accounts</a>
@@ -32,7 +68,10 @@
 
 @code {
     private List<Character>? characters;
+    private List<Character>? allCharacters;
+    private Dictionary<string, string> UserNames = new();
     private bool loggedIn = false;
+    private bool IsSpectator;
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
     protected override async Task OnInitializedAsync()
@@ -44,11 +83,52 @@
         {
             loggedIn = true;
 
-            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            IsSpectator = user.IsInRole("Spectator");
 
-            if (userId != null)
+            if (IsSpectator)
             {
-                characters = CharactersRepository.GetCharactersByUserId(userId);
+                characters = CharactersRepository.GetPublicCharacters();
+
+                foreach (var character in characters)
+                {
+                    if (!string.IsNullOrEmpty(character.UserId) &&
+                        !UserNames.ContainsKey(character.UserId))
+                    {
+                        var owner =
+                            await UserManager.FindByIdAsync(
+                                character.UserId);
+
+                        UserNames[character.UserId] =
+                            owner?.UserName ?? "Unknown";
+                    }
+                }
+            }
+            else
+            {
+                var userId =
+                    user.FindFirst(
+                        System.Security.Claims.ClaimTypes.NameIdentifier)
+                    ?.Value;
+
+                if (userId != null)
+                {
+                    characters = CharactersRepository.GetCharactersByUserId(userId);
+                }
+
+                allCharacters = CharactersRepository.GetCharacters();
+                foreach (var character in allCharacters)
+                {
+                    if (!string.IsNullOrEmpty(character.UserId) &&
+                        !UserNames.ContainsKey(character.UserId))
+                    {
+                        var owner =
+                            await UserManager.FindByIdAsync(
+                                character.UserId);
+
+                        UserNames[character.UserId] =
+                            owner?.UserName ?? "Unknown";
+                    }
+                }
             }
         }
     }
