@@ -1,4 +1,4 @@
-﻿namespace MythRPG.Core
+﻿namespace MythRPG.Data
 {
     public enum TraitsSpellsDisplayMode
     {

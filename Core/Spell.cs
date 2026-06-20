@@ -9,7 +9,8 @@ namespace MythRPG.Core
 
         [Range(1, int.MaxValue, ErrorMessage = "Cost must be greater than 0.")]
         public int Cost { get; set; }
-        public string? Colour { get; set; }
+        public SpellColour? Colour { get; set; }
+        public string? LegacyColour { get; set; }
         public string? Type { get; set; }
         public string? Casting { get; set; }
         public string? Duration { get; set; }

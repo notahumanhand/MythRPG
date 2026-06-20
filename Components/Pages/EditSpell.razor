@@ -5,6 +5,7 @@
 @attribute [Authorize(Roles = "Admin")]
 
 @inject ISpellsRepository SpellsRepository
+@inject ISpellColoursRepository SpellColoursRepository
 
 <PageTitle>Mythmaven: Edit Spell</PageTitle>
 
@@ -49,17 +50,16 @@
             <div class="form-group">
                 <label for="colour">Colour</label>
                 <select id="colour"
-                        @bind="spell.Colour"
+                        @bind="selectedColourId"
                         class="form-control">
-                    <option>Black</option>
-                    <option>White</option>
-                    <option>Red</option>
-                    <option>Orange</option>
-                    <option>Gold</option>
-                    <option>Green</option>
-                    <option>Blue</option>
-                    <option>Purple</option>
-                    <option>Brown</option>
+
+                    @foreach (var colour in spellColours)
+                    {
+                        <option value="@colour.SpellColourId">
+                            @colour.Name
+                        </option>
+                    }
+
                 </select>
             </div>
         </div>
@@ -169,12 +169,27 @@
     public int SpellId { get; set; }
 
     private Spell spell = new Spell();
+    private List<SpellColour> spellColours = new();
+    private int selectedColourId
+    {
+        get => spell.Colour?.SpellColourId ?? 0;
+
+        set
+        {
+            spell.Colour =
+                SpellColoursRepository.GetSpellColourById(value);
+        }
+    }
 
     private bool confirmText = false;
 
     protected override void OnParametersSet()
     {
-        spell = SpellsRepository.GetSpellById(SpellId);
+        spellColours =
+            SpellColoursRepository.GetSpellColours();
+
+        spell =
+            SpellsRepository.GetSpellById(SpellId);
     }
 
     void Update()

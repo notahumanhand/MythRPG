@@ -1,15 +1,42 @@
 ﻿@inject ISpellsRepository SpellsRepository
 
-<option value="">v Choose Spell v</option>
+<option value="">Choose Spell</option>
+
 @foreach (var spell in spells)
 {
-    <option value="@spell.Name">(@spell.Colour) @spell.Name: @spell.Cost</option>
+    <option value="@spell.Name">
+        (@spell.Colour?.Name) @spell.Name: @spell.Cost
+    </option>
 }
 
 @code {
-    private List<Spell> spells = new List<Spell>();
+    [Parameter]
+    public List<SpellColour>? AllowedColours { get; set; }
+
+    private List<Spell> spells = new();
+
     protected override void OnParametersSet()
     {
-        spells = SpellsRepository.GetSpells();
+        var allSpells =
+            SpellsRepository.GetSpells();
+
+        if (AllowedColours is null ||
+            AllowedColours.Count == 0)
+        {
+            spells = allSpells;
+            return;
+        }
+
+        var allowedIds =
+            AllowedColours
+                .Select(c => c.SpellColourId)
+                .ToHashSet();
+
+        spells = allSpells
+            .Where(s =>
+                s.Colour is not null &&
+                allowedIds.Contains(
+                    s.Colour.SpellColourId))
+            .ToList();
     }
 }

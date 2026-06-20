@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @inject ISpellsRepository SpellsRepository
+@inject ISpellColoursRepository SpellColoursRepository
 
 <h3>Spells</h3>
 <AuthorizeView Roles="Admin" Context="adminContext">
@@ -37,16 +38,17 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="colour">Colour</label>
-                            <InputSelect id="colour" @bind-Value="spell.Colour" class="form-control">
-                                <option>Black</option>
-                                <option>White</option>
-                                <option>Red</option>
-                                <option>Orange</option>
-                                <option>Gold</option>
-                                <option>Green</option>
-                                <option>Blue</option>
-                                <option>Purple</option>
-                                <option>Brown</option>
+                            <InputSelect id="colour"
+                                         @bind-Value="selectedColourId"
+                                         class="form-control">
+
+                                @foreach (var colour in spellColours)
+                                {
+                                    <option value="@colour.SpellColourId">
+                                        @colour.Name
+                                    </option>
+                                }
+
                             </InputSelect>
                     </div>
                 </div>
@@ -127,7 +129,7 @@
             </div>
             <div class="col-md-2">
                 <b>Colour</b><br>
-                @spell.Colour
+                @(spell.Colour?.Name ?? "None")
             </div>
             <div class="col-md-2">
                 <b>Type</b><br>
@@ -159,17 +161,49 @@
 
 @code {
     [SupplyParameterFromForm]
-    private Spell spell { get; set; } = new Spell();
+    private Spell spell { get; set; } = new();
+
+    List<SpellColour> spellColours = new();
+   
+    private int selectedColourId
+    {
+        get => spell.Colour?.SpellColourId ?? 0;
+        set
+        {
+            spell.Colour =
+                SpellColoursRepository.GetSpellColourById(value);
+        }
+    }
 
     List<Spell> spells = new List<Spell>();
     protected override void OnParametersSet()
     {
         spells = SpellsRepository.GetSpells();
+        spellColours = SpellColoursRepository.GetSpellColours();
+
+        if (selectedColourId == 0 &&
+            spellColours.Count > 0)
+        {
+            spell = CreateDefaultSpell();
+        }
     }
     private void Create()
     {
+        SpellColour? colour = SpellColoursRepository.GetSpellColourById(selectedColourId);
+        spell.Colour = colour;
         SpellsRepository.AddSpell(spell);
-        spell = new Spell();
+        spell = CreateDefaultSpell();
         spells = SpellsRepository.GetSpells();
+    }
+    private Spell CreateDefaultSpell()
+    {
+        return new Spell
+            {
+                Casting = "Basic Action",
+                Type = "Attack",
+                Duration = "Instant",
+                Range = "Self",
+                Colour = spellColours.FirstOrDefault()
+            };
     }
 }

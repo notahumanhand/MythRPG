@@ -18,7 +18,7 @@ else
             currentArcana < spell.Cost;
 
         <div class="border border-dark m-2 p-2 rounded @(insufficientArcana ? "bg-light" : "")"
-             style="border-left: 8px solid @GetSpellColor(spell.Colour) !important;">
+             style="border-left: 8px solid @GetSpellColor(spell.Colour?.Name) !important;">
 
             @if (mode == TraitsSpellsDisplayMode.CharacterEdit)
             {
@@ -79,7 +79,7 @@ else
 
                 <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
                     <b>Colour</b><br>
-                    @spell.Colour
+                    @(spell.Colour?.Name ?? "None")
                 </div>
 
                 <div class="col-md-2 border border-dark p-2 rounded" style="background: #EEECE5;">
@@ -148,7 +148,7 @@ else
             "blue" => "#3169D9",
             "purple" => "#971EA4",
             "brown" => "#4E3526",
-            _ => "#121214"
+            _ => "#4c362f"
         };
     }
 

@@ -13,6 +13,13 @@ namespace MythRPG.Core
         public void AddSpell(Spell spell)
         {
             var db = this.contextFactory;
+            if (spell.Colour is not null)
+            {
+                spell.Colour =
+                    db.SpellColours.Find(
+                        spell.Colour.SpellColourId);
+            }
+
             db.Spells.Add(spell);
             db.SaveChanges();
         }
@@ -29,24 +36,34 @@ namespace MythRPG.Core
         public List<Spell> GetSpells()
         {
             var db = this.contextFactory;
-            return db.Spells.ToList();
+
+            return db.Spells
+                .Include(s => s.Colour)
+                .ToList();
         }
         public Spell GetSpellById(int id)
         {
             var db = this.contextFactory;
-            var spell = db.Spells.Find(id);
-            if (spell is not null) return spell;
+
+            var spell =
+                db.Spells
+                    .Include(s => s.Colour)
+                    .FirstOrDefault(s => s.SpellId == id);
+
+            if (spell is not null)
+            {
+                return spell;
+            }
+
             return new Spell();
         }
         public Spell? GetSpellByName(string name)
         {
             var db = this.contextFactory;
-            List<Spell> spells = GetSpells();
-            foreach (var spell in spells)
-            {
-                if (spell.Name.Equals(name)) return spell;
-            }
-            return new Spell();
+
+            return db.Spells
+                .Include(s => s.Colour)
+                .FirstOrDefault(s => s.Name == name);
         }
         public void UpdateSpell(int id, Spell spell)
         {
@@ -58,7 +75,7 @@ namespace MythRPG.Core
             {
                 spellToUpdate.Name = spell.Name;
                 spellToUpdate.Cost = spell.Cost;
-                spellToUpdate.Colour = spell.Colour;
+                spellToUpdate.Colour = spell.Colour is null ? null : db.SpellColours.Find(spell.Colour.SpellColourId);
                 spellToUpdate.Type = spell.Type;
                 spellToUpdate.Casting = spell.Casting;
                 spellToUpdate.Duration = spell.Duration;
