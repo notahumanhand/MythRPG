@@ -54,8 +54,10 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHealthChecks().AddSqlServer(builder.Configuration.GetConnectionString("MythRPG"));
 
 builder.Services.AddTransient<ICharactersRepository, CharactersRepository>();
+builder.Services.AddTransient<IClassesRepository, ClassesRepository>();
 builder.Services.AddTransient<ITraitsRepository, TraitsRepository>();
 builder.Services.AddTransient<ISpellsRepository, SpellsRepository>();
+builder.Services.AddTransient<ISpellColoursRepository, SpellColoursRepository>();
 builder.Services.AddTransient<IUsersRepository, UsersRepository>();
 
 builder.Services.AddApplicationInsightsTelemetry();

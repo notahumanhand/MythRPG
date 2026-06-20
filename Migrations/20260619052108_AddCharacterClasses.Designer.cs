@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MythRPG.Data;
 
@@ -11,9 +12,11 @@ using MythRPG.Data;
 namespace MythRPG.Migrations
 {
     [DbContext(typeof(MythRPGContext))]
-    partial class MythRPGContextModelSnapshot : ModelSnapshot
+    [Migration("20260619052108_AddCharacterClasses")]
+    partial class AddCharacterClasses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -340,12 +343,6 @@ namespace MythRPG.Migrations
 
                     b.Property<string>("PrimaryBonus")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SpellsPerLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StartingSpells")
-                        .HasColumnType("int");
 
                     b.HasKey("CharacterClassId");
 

@@ -122,10 +122,12 @@
     {
         Bonus? bonus = TraitsRepository.GetBonusById(addbonus);
         if (bonus is not null) trait.Bonuses.Add(bonus);
+        bonuses = TraitsRepository.GetBonuses();
     }
     private void Create()
     {
         TraitsRepository.AddTrait(trait);
         trait = new Trait();
+        traits = TraitsRepository.GetTraits();
     }
 }

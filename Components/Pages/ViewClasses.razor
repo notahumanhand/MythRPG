@@ -1,0 +1,149 @@
+﻿@page "/classes"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject IClassesRepository ClassesRepository
+
+<PageTitle>Mythmaven: Classes</PageTitle>
+
+<h3>All Classes</h3>
+<p>
+    Classes are a representation of a character’s profession, or perhaps sub-profession within adventuring. 
+    At first level, all characters choose one of six class options, gaining initial traits depending on their choice. 
+    In later levels, a character can forgo choosing a class trait and instead choose another class, 
+    gaining all of that class’s traits with the exception of their newer class’s Primary Class Bonus, of 
+    which a character can only ever have one. Selecting another class also allows a character to take traits associated with 
+    that class. While there is no limit to the number of classes one can take, it is recommended to stick to one or two.
+</p>
+
+<AuthorizeView Roles="Admin" Context="adminContext">
+    <Authorized>
+        <ListClassesComponent classes="classes" admin="true"></ListClassesComponent>
+        <h4>Add Class</h4>
+
+        <div class="border border-dark m-2 p-2 rounded">
+            <EditForm Model="characterClass"
+                      FormName="formClass"
+                      OnValidSubmit="Create">
+
+                <DataAnnotationsValidator />
+
+                <div class="form-group">
+                    <label for="name">Class Name</label>
+                    <InputText id="name"
+                               @bind-Value="characterClass.Name"
+                               class="form-control">
+                    </InputText>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <InputTextArea id="description"
+                                   @bind-Value="characterClass.Description"
+                                   class="form-control">
+                    </InputTextArea>
+                </div>
+
+                <div class="form-group">
+                    <label for="primaryBonus">Primary Bonus</label>
+                    <InputText id="primaryBonus"
+                               @bind-Value="characterClass.PrimaryBonus"
+                               class="form-control">
+                    </InputText>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="startingSpells">Starting Spells</label>
+                            <InputNumber id="startingSpells"
+                                         @bind-Value="characterClass.StartingSpells"
+                                         class="form-control">
+                            </InputNumber>
+                            <ValidationMessage For="() => characterClass.StartingSpells" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="spellsPerLevel">Spells Per Level</label>
+                            <InputNumber id="spellsPerLevel"
+                                         @bind-Value="characterClass.SpellsPerLevel"
+                                         class="form-control">
+                            </InputNumber>
+                            <ValidationMessage For="() => characterClass.SpellsPerLevel" />
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+                <br />
+
+                <h4>@characterClass.Name</h4>
+
+                <div>
+                    <h5>Description</h5>
+                    <p>@characterClass.Description</p>
+                </div>
+
+                <div>
+                    <h5>Primary Bonus</h5>
+                    <p>@characterClass.PrimaryBonus</p>
+                </div>
+
+                <div>
+                    <h5>Spell Progression</h5>
+                    <p>@SpellProgressionPreview()</p>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Create
+                </button>
+
+            </EditForm>
+        </div>
+    </Authorized>
+
+    <NotAuthorized>
+        <ListClassesComponent classes="classes" admin="false"></ListClassesComponent>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<CharacterClass> classes = new();
+
+    protected override void OnParametersSet()
+    {
+        classes = ClassesRepository.GetClasses();
+    }
+
+    [SupplyParameterFromForm]
+    private CharacterClass characterClass { get; set; } = new();
+
+    private void Create()
+    {
+        ClassesRepository.AddClass(characterClass);
+
+        characterClass = new CharacterClass();
+
+        classes = ClassesRepository.GetClasses();
+    }
+
+    private string SpellProgressionPreview()
+    {
+        string startingSpellText =
+            characterClass.StartingSpells == 1
+                ? "spell"
+                : "spells";
+
+        string perLevelSpellText =
+            characterClass.SpellsPerLevel == 1
+                ? "spell"
+                : "spells";
+
+        return
+            $"Starts with {characterClass.StartingSpells} {startingSpellText} and gains {characterClass.SpellsPerLevel} {perLevelSpellText} per level.";
+    }
+}

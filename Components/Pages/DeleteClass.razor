@@ -1,0 +1,46 @@
+﻿@page "/class/delete/{ClassId:int}"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IClassesRepository ClassesRepository
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete Class</PageTitle>
+
+@if (characterClass is not null)
+{
+    <h1>Are you sure you want to delete @characterClass.Name?</h1>
+
+    <button type="button"
+            class="btn btn-danger"
+            @onclick="Delete">
+        Yes, delete this class
+    </button>
+
+    <a href="/classes"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+}
+
+@code {
+    [Parameter]
+    public int ClassId { get; set; }
+
+    private CharacterClass characterClass = new();
+
+    protected override void OnParametersSet()
+    {
+        characterClass = ClassesRepository.GetClassById(ClassId);
+    }
+
+    void Delete()
+    {
+        ClassesRepository.DeleteClass(ClassId);
+
+        NavigationManager.NavigateTo("/classes");
+    }
+}

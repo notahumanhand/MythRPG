@@ -12,7 +12,7 @@ namespace MythRPG.Core
         public bool IsPublic { get; set; }
         public string CharacterName { get; set; } = string.Empty;
 
-        [Range(1, 20, ErrorMessage = "Class must be between 1 and 20.")]
+        [Range(1, 20, ErrorMessage = "Level must be between 1 and 20.")]
         public int CharacterLevel { get; set; }
         public string? CharacterClass { get; set; }
         public string? MythicPath { get; set; }

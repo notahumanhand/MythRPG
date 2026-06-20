@@ -1,0 +1,206 @@
+﻿@page "/class/edit/{ClassId:int}"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject ISpellColoursRepository SpellColoursRepository
+@inject IClassesRepository ClassesRepository
+
+<PageTitle>Mythmaven: Edit Class</PageTitle>
+
+@if (characterClass is not null)
+{
+    <div class="form-group">
+        <label for="name">Class Name</label>
+        <input type="text"
+               id="name"
+               @bind="characterClass.Name"
+               class="form-control">
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description"
+                  @bind="characterClass.Description"
+                  class="form-control">
+            </textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="primaryBonus">Primary Bonus</label>
+        <input type="text"
+               id="primaryBonus"
+               @bind="characterClass.PrimaryBonus"
+               class="form-control">
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="startingSpells">Starting Spells</label>
+                <input type="number"
+                       min="0"
+                       max="100"
+                       id="startingSpells"
+                       @bind="characterClass.StartingSpells"
+                       class="form-control">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="spellsPerLevel">Spells Per Level</label>
+                <input type="number"
+                       min="0"
+                       max="100"
+                       id="spellsPerLevel"
+                       @bind="characterClass.SpellsPerLevel"
+                       class="form-control">
+            </div>
+        </div>
+
+        <hr />
+
+        <h4>Spell Colours</h4>
+
+        <div class="form-group">
+            <label for="spellColour">
+                Add Colour
+            </label>
+
+            <div class="row">
+                <div class="col-md-10">
+                    <InputSelect id="spellColour"
+                                 @bind-Value="selectedSpellColourId"
+                                 class="form-control">
+
+                        @foreach (var colour in spellColours)
+                        {
+                            <option value="@colour.SpellColourId">
+                                @colour.Name
+                            </option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button"
+                            class="btn btn-success"
+                            @onclick="AddSpellColour">
+                        Add
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <br />
+
+        <h5>Selected Colours</h5>
+
+        @if (characterClass.SpellColours.Count == 0)
+        {
+            <p>No spell colours selected.</p>
+        }
+        else
+        {
+            @foreach (var colour in characterClass.SpellColours)
+            {
+                <div class="row mb-2">
+                    <div class="col-md-10">
+                        @colour.Name
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="button"
+                                class="btn btn-danger"
+                                @onclick="() => RemoveSpellColour(colour)">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+
+@if (confirmText)
+{
+    <p>
+        Changes saved!
+        <button type="button"
+                class="btn btn-danger"
+                @onclick="ClearAlert">
+            X
+        </button>
+    </p>
+}
+
+<button type="button"
+        class="btn btn-success"
+        @onclick="Update">
+    Save Changes
+</button>
+
+<a class="btn btn-primary"
+   href="/classes">
+    Return to Classes
+</a>
+
+@code {
+    [Parameter]
+    public int ClassId { get; set; }
+
+    private CharacterClass characterClass = new();
+
+    private bool confirmText = false;
+
+    private List<SpellColour> spellColours = new();
+
+    private int selectedSpellColourId;
+
+    protected override void OnParametersSet()
+    {
+        characterClass =
+            ClassesRepository.GetClassById(ClassId);
+
+        spellColours =
+            SpellColoursRepository.GetSpellColours();
+
+        selectedSpellColourId =
+            spellColours.FirstOrDefault()?.SpellColourId ?? 0;
+    }
+
+    void Update()
+    {
+        ClassesRepository.UpdateClass(ClassId, characterClass);
+        confirmText = true;
+    }
+
+    void ClearAlert()
+    {
+        confirmText = false;
+    }
+
+    private void AddSpellColour()
+    {
+        ClassesRepository.AddSpellColourToClass(
+            ClassId,
+            selectedSpellColourId);
+
+        characterClass =
+            ClassesRepository.GetClassById(ClassId);
+    }
+
+    private void RemoveSpellColour(
+        SpellColour colour)
+    {
+        ClassesRepository.RemoveSpellColourFromClass(
+            ClassId,
+            colour.SpellColourId);
+
+        characterClass =
+            ClassesRepository.GetClassById(ClassId);
+    }
+}

@@ -1,0 +1,127 @@
+﻿@inject IClassesRepository ClassesRepository
+
+@if (classes is null || classes.Count == 0)
+{
+    <p>No classes to display.</p>
+}
+else
+{
+    @foreach (var characterClass in classes)
+    {
+        <div class="border border-dark m-2 p-2 rounded">
+
+            <div class="row">
+                <div class="col-md-10">
+                    <h4>@characterClass.Name</h4>
+                </div>
+
+                <div class="col-md-2">
+                    <a class="btn btn-light"
+                       href="/class/@characterClass.CharacterClassId">
+                        View
+                    </a>
+                    @if (admin)
+                    {
+                        <a class="btn btn-primary"
+                           href="/class/edit/@characterClass.CharacterClassId">
+                            Edit
+                        </a>
+                        <a class="btn btn-danger"
+                           href="/class/delete/@characterClass.CharacterClassId">
+                            Delete
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <h5>Description</h5>
+            @if (!string.IsNullOrWhiteSpace(characterClass.Description))
+            {
+                <p>
+                    @(characterClass.Description.Length > 250
+                        ? characterClass.Description.Substring(0, 250) + "..."
+                        : characterClass.Description)
+                </p>
+            }
+
+            <h5>Primary Bonus</h5>
+            <p>@characterClass.PrimaryBonus</p>
+
+            <h5>Traits Granted:</h5>
+            <p>@GrantedTraitsText(characterClass)</p>
+
+            <h5>Spells</h5>
+            <p>@SpellColourText(characterClass)</p>
+            <p>
+                Starts with @SpellCountText(characterClass.StartingSpells)
+                and gains @SpellCountText(characterClass.SpellsPerLevel) per level.
+            </p>
+
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public required List<CharacterClass> classes { get; set; }
+
+    [Parameter]
+    public bool admin { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        classes = ClassesRepository.GetClasses();
+    }
+
+    private string SpellCountText(int count)
+    {
+        return count == 1
+            ? $"{count} spell"
+            : $"{count} spells";
+    }
+
+    private string SpellColourText(CharacterClass characterClass)
+    {
+        var colours =
+            characterClass.SpellColours
+                .Select(c => c.Name)
+                .ToList();
+
+        if (colours.Count == 0)
+        {
+            return "This class does not grant access to any spell colours.";
+        }
+
+        if (colours.Count == 1)
+        {
+            return $"Grants access to the following spell list: {colours[0]}.";
+        }
+
+        if (colours.Count == 2)
+        {
+            return $"Grants access to the following spell lists: {colours[0]} and {colours[1]}.";
+        }
+
+        string allButLast =
+            string.Join(", ", colours.Take(colours.Count - 1));
+
+        return
+            $"Grants access to the following spell lists: {allButLast}, and {colours.Last()}.";
+    }
+
+    private string GrantedTraitsText(CharacterClass characterClass)
+    {
+        var traits =
+            characterClass.GrantedTraits
+                .Select(t => t.Name)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .ToList();
+
+        if (traits.Count == 0)
+        {
+            return "None";
+        }
+
+        return string.Join(", ", traits);
+    }
+}

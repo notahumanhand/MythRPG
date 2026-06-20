@@ -16,76 +16,24 @@ namespace MythRPG.Data
         public DbSet<Trait> Traits { get; set; }
         public DbSet<Bonus> Bonuses { get; set; }
         public DbSet<Spell> Spells { get; set; }
+        public DbSet<CharacterClass> CharacterClasses { get; set; }
+        public DbSet<SpellColour> SpellColours { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Character>().HasData(
-                new Character { CharacterId = 1, CharacterName = "Briar Elderose", CharacterClass = "Witch", CharacterLevel = 4 }
+
+            modelBuilder.Entity<SpellColour>().HasData(
+                new SpellColour { SpellColourId = 1, Name = "Black" },
+                new SpellColour { SpellColourId = 2, Name = "White" },
+                new SpellColour { SpellColourId = 3, Name = "Red" },
+                new SpellColour { SpellColourId = 4, Name = "Orange" },
+                new SpellColour { SpellColourId = 5, Name = "Gold" },
+                new SpellColour { SpellColourId = 6, Name = "Green" },
+                new SpellColour { SpellColourId = 7, Name = "Blue" },
+                new SpellColour { SpellColourId = 8, Name = "Purple" },
+                new SpellColour { SpellColourId = 9, Name = "Brown" }
             );
-            modelBuilder.Entity<Bonus>().HasData(
-                new Bonus { BonusId = 1, Amount = 2, Modifies = "Prowess", Type = "Other" },
-                new Bonus { BonusId = 2, Amount = 2, Modifies = "Arcana", Type = "Other" }
-            );
-            modelBuilder.Entity<Trait>().HasData(
-                new Trait { 
-                    TraitId = 1,
-                    Name = "Increased Prowess",
-                    Source = "Class Trait",
-                    ActionCost = "None",
-                    ResourceCost = "None",
-                    Description = "Add 2 points to your Prowess pool total. You may take this trait multiple times."
-                },
-                new Trait
-                {
-                    TraitId = 2,
-                    Name = "Improved Arcanum",
-                    Source = "Class Trait",
-                    ActionCost = "None",
-                    ResourceCost = "None",
-                    Description = "Add 2 points to your Arcana pool total. You may take this trait multiple times."
-                }
-            );
-            modelBuilder.Entity<Spell>().HasData(
-                new Spell
-                {
-                    SpellId = 1,
-                    Name = "Entangle",
-                    Cost = 1,
-                    Colour = "Black",
-                    Type = "Debuff",
-                    Casting = "Basic Action",
-                    Duration = "Round",
-                    Range = "Short",
-                    Concentration = false,
-                    Effect = "Choose a target within range and make a spell attack, contested by their Magical Defence. On a success, the target is Restrained until the start of your next turn."
-                },
-                new Spell
-                {
-                    SpellId = 2,
-                    Name = "Divine Bolt",
-                    Cost = 3,
-                    Colour = "White",
-                    Type = "Attack",
-                    Casting = "Basic Action",
-                    Duration = "Instant",
-                    Range = "Short",
-                    Concentration = false,
-                    Effect = "Make a ranged spell attack against a creature, contested by their Magical Defence. On a hit, deal 3d6+C Radiant damage to the creature. This damage increases by 1d6 if they are a Fiend or Undead."
-                },
-                new Spell
-                {
-                    SpellId = 3,
-                    Name = "Invigorating Touch",
-                    Cost = 2,
-                    Colour = "Red",
-                    Type = "Healing",
-                    Casting = "Basic Action",
-                    Duration = "Instant",
-                    Range = "Melee",
-                    Concentration = false,
-                    Effect = "Choose a willing creature within range. They regain 1d8+C Health."
-                }
-            );
+
             modelBuilder.Entity<Character>()
                 .HasMany(e => e.Traits)
                 .WithMany();
@@ -95,8 +43,20 @@ namespace MythRPG.Data
             modelBuilder.Entity<Trait>()
                 .HasMany(e => e.Bonuses)
                 .WithMany();
+            modelBuilder.Entity<SpellColour>()
+                .HasIndex(c => c.Name)
+                .IsUnique();
+            modelBuilder.Entity<CharacterClass>()
+                .HasMany(c => c.GrantedTraits)
+                .WithMany();
+            modelBuilder.Entity<CharacterClass>()
+                .HasMany(c => c.SpellColours)
+                .WithMany();
+
             modelBuilder.Entity<Character>().Navigation(e => e.Traits).AutoInclude();
             modelBuilder.Entity<Character>().Navigation(e => e.Spells).AutoInclude();
+            modelBuilder.Entity<CharacterClass>().Navigation(c => c.GrantedTraits).AutoInclude();
+            modelBuilder.Entity<CharacterClass>().Navigation(c => c.SpellColours).AutoInclude();
             //modelBuilder.Entity<Trait>().Navigation(e => e.Bonuses).AutoInclude();
         }
         
