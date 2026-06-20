@@ -46,7 +46,7 @@
     </div>
 
     <h4>Granted Traits</h4>
-    <p>@GrantedTraitsText()</p>
+    <ListTraitsComponent traits="characterClass.GrantedTraits" bonuses="true" mode="TraitsSpellsDisplayMode.Display"></ListTraitsComponent>
 }
 
 @code {
@@ -100,21 +100,5 @@
 
         return
             $"{string.Join(", ", colours.Take(colours.Count - 1))}, and {colours.Last()}";
-    }
-
-    private string GrantedTraitsText()
-    {
-        var traits =
-            characterClass.GrantedTraits
-                .Select(t => t.Name)
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .ToList();
-
-        if (traits.Count == 0)
-        {
-            return "None";
-        }
-
-        return string.Join(", ", traits);
     }
 }

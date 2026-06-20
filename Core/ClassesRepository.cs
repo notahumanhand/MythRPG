@@ -99,9 +99,7 @@ namespace MythRPG.Core
             db.SaveChanges();
         }
 
-        public void AddSpellColourToClass(
-    int classId,
-    int spellColourId)
+        public void AddSpellColourToClass(int classId, int spellColourId)
         {
             var db = this.contextFactory;
 
@@ -129,9 +127,7 @@ namespace MythRPG.Core
             }
         }
 
-        public void RemoveSpellColourFromClass(
-            int classId,
-            int spellColourId)
+        public void RemoveSpellColourFromClass(int classId, int spellColourId)
         {
             var db = this.contextFactory;
 
@@ -154,6 +150,62 @@ namespace MythRPG.Core
             if (colour is not null)
             {
                 characterClass.SpellColours.Remove(colour);
+
+                db.SaveChanges();
+            }
+        }
+
+        public void AddTraitToClass(int classId, int traitId)
+        {
+            var db = this.contextFactory;
+
+            var characterClass =
+                db.CharacterClasses
+                    .Include(c => c.GrantedTraits)
+                    .FirstOrDefault(
+                        c => c.CharacterClassId == classId);
+
+            var trait =
+                db.Traits.Find(traitId);
+
+            if (characterClass is null ||
+                trait is null)
+            {
+                return;
+            }
+
+            if (!characterClass.GrantedTraits
+                .Any(t => t.TraitId == traitId))
+            {
+                characterClass.GrantedTraits.Add(trait);
+
+                db.SaveChanges();
+            }
+        }
+
+        public void RemoveTraitFromClass(int classId, int traitId)
+        {
+            var db = this.contextFactory;
+
+            var characterClass =
+                db.CharacterClasses
+                    .Include(c => c.GrantedTraits)
+                    .FirstOrDefault(
+                        c => c.CharacterClassId == classId);
+
+            if (characterClass is null)
+            {
+                return;
+            }
+
+            var trait =
+                characterClass.GrantedTraits
+                    .FirstOrDefault(
+                        t => t.TraitId == traitId);
+
+            if (trait is not null)
+            {
+                characterClass.GrantedTraits.Remove(trait);
 
                 db.SaveChanges();
             }

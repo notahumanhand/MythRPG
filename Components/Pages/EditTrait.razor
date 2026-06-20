@@ -50,7 +50,10 @@
     [Parameter]
     public int TraitId { get; set; }
 
-    private Trait trait = new Trait();
+    private Trait trait = new Trait
+        {
+            Name = string.Empty
+        };
 
     private bool confirmText = false;
 

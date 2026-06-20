@@ -92,7 +92,10 @@
 
 @code {
     [SupplyParameterFromForm]
-    private Trait trait { get; set; } = new Trait();
+    private Trait trait { get; set; } = new Trait
+        {
+            Name = string.Empty
+        };
 
     List<Trait> traits = new List<Trait>();
     int addbonus = 0;
@@ -127,7 +130,10 @@
     private void Create()
     {
         TraitsRepository.AddTrait(trait);
-        trait = new Trait();
+        trait = new Trait
+            {
+                Name = string.Empty
+            };
         traits = TraitsRepository.GetTraits();
     }
 }

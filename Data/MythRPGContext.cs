@@ -53,6 +53,16 @@ namespace MythRPG.Data
                 .HasMany(c => c.SpellColours)
                 .WithMany();
 
+            modelBuilder.Entity<Trait>()
+                .HasIndex(t => t.Name)
+                .IsUnique();
+            modelBuilder.Entity<SpellColour>()
+                .HasIndex(c => c.Name)
+                .IsUnique();
+            modelBuilder.Entity<Trait>()
+                .HasIndex(t => t.Name)
+                .IsUnique();
+
             modelBuilder.Entity<Character>().Navigation(e => e.Traits).AutoInclude();
             modelBuilder.Entity<Character>().Navigation(e => e.Spells).AutoInclude();
             modelBuilder.Entity<CharacterClass>().Navigation(c => c.GrantedTraits).AutoInclude();

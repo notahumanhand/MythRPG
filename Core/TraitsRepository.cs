@@ -52,7 +52,10 @@ namespace MythRPG.Core
             var db = this.contextFactory;
             var trait = db.Traits.Find(id);
             if (trait is not null)  return trait;
-            return new Trait();
+            return new Trait
+            {
+                Name = string.Empty
+            };
         }
         public Trait GetTraitBonusById(int id)
         {
@@ -62,7 +65,10 @@ namespace MythRPG.Core
             {
                 if (trait.TraitId == id) return trait;
             }
-            return new Trait();
+            return new Trait
+            {
+                Name = string.Empty
+            };
         }
         public Bonus? GetBonusById(int id)
         {
@@ -79,7 +85,10 @@ namespace MythRPG.Core
             {
                 if (trait.Name is not null && trait.Name.Equals(name)) return trait;
             }
-            return new Trait();
+            return new Trait
+            {
+                Name = string.Empty
+            };
         }
         public Trait GetTraitBonusByName(string name)
         {
@@ -89,7 +98,10 @@ namespace MythRPG.Core
             {
                 if (trait.Name is not null && trait.Name.Equals(name)) return trait;
             }
-            return new Trait();
+            return new Trait
+            {
+                Name = string.Empty
+            };
         }
         public void UpdateTrait(int id, Trait trait)
         {

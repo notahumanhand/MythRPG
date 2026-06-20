@@ -5,6 +5,7 @@
         Display,
         CharacterSheet,
         CharacterEdit,
+        ClassEdit,
         AdminView
     }
 }

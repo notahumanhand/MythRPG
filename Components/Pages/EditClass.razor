@@ -7,6 +7,7 @@
 
 @inject ISpellColoursRepository SpellColoursRepository
 @inject IClassesRepository ClassesRepository
+@inject ITraitsRepository TraitsRepository
 
 <PageTitle>Mythmaven: Edit Class</PageTitle>
 
@@ -122,6 +123,44 @@
                 </div>
             }
         }
+
+        <hr />
+
+        <h4>Granted Traits</h4>
+
+        <div class="form-group">
+            <label for="trait">
+                Add Trait
+            </label>
+
+            <div class="row">
+                <div class="col-md-10">
+                    <InputSelect id="trait"
+                                 @bind-Value="selectedTraitName"
+                                 class="form-control">
+
+                        <ListTraitOptionsComponent traitsOverride="traits">
+                        </ListTraitOptionsComponent>
+
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button"
+                            class="btn btn-success"
+                            @onclick="AddTrait">
+                        Add
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <ListTraitsComponent traits="characterClass.GrantedTraits"
+                             bonuses="true"
+                             classId="ClassId"
+                             mode="TraitsSpellsDisplayMode.ClassEdit">
+        </ListTraitsComponent>
+
     </div>
 }
 
@@ -160,6 +199,10 @@
 
     private int selectedSpellColourId;
 
+    private List<Trait> traits = new();
+
+    private string selectedTraitName = "";
+
     protected override void OnParametersSet()
     {
         characterClass =
@@ -170,6 +213,20 @@
 
         selectedSpellColourId =
             spellColours.FirstOrDefault()?.SpellColourId ?? 0;
+
+        RefreshAvailableTraits();
+    }
+
+    private void RefreshAvailableTraits()
+    {
+        traits =
+            TraitsRepository.GetTraits()
+                .Where(t =>
+                    !characterClass.GrantedTraits
+                        .Any(gt => gt.TraitId == t.TraitId))
+                .ToList();
+
+        selectedTraitName = "";
     }
 
     void Update()
@@ -202,5 +259,26 @@
 
         characterClass =
             ClassesRepository.GetClassById(ClassId);
+    }
+
+    private void AddTrait()
+    {
+        Trait? trait =
+            TraitsRepository.GetTraitByName(
+                selectedTraitName);
+
+        if (trait is null)
+        {
+            return;
+        }
+
+        ClassesRepository.AddTraitToClass(
+            ClassId,
+            trait.TraitId);
+
+        characterClass =
+            ClassesRepository.GetClassById(ClassId);
+
+        RefreshAvailableTraits();
     }
 }

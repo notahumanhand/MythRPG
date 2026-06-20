@@ -9,8 +9,19 @@
 
 @code {
     private List<Trait> traits = new List<Trait>();
+
+    [Parameter]
+    public List<Trait>? traitsOverride { get; set; }
+
     protected override void OnParametersSet()
     {
-        traits = TraitsRepository.GetTraits();
+        if (traitsOverride is not null)
+        {
+            traits = traitsOverride;
+        }
+        else
+        {
+            traits = TraitsRepository.GetTraits();
+        }
     }
 }
