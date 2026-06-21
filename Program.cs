@@ -7,6 +7,8 @@ using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Identity;
 using HealthChecks.SqlServer;
+using MythRPG.Core.Interfaces;
+using MythRPG.Core.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);

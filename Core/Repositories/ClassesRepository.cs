@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MythRPG.Core.Interfaces;
 using MythRPG.Data;
 
-namespace MythRPG.Core
+namespace MythRPG.Core.Repositories
 {
     public class ClassesRepository : IClassesRepository
     {
@@ -14,7 +15,7 @@ namespace MythRPG.Core
 
         public void AddClass(CharacterClass characterClass)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             db.CharacterClasses.Add(characterClass);
 
@@ -23,7 +24,7 @@ namespace MythRPG.Core
 
         public List<CharacterClass> GetClasses()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             return db.CharacterClasses
                 .Include(c => c.GrantedTraits)
@@ -33,7 +34,7 @@ namespace MythRPG.Core
 
         public List<CharacterClass> ListClasses()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             return db.CharacterClasses.ToList();
         }
@@ -65,7 +66,7 @@ namespace MythRPG.Core
                 return;
             }
 
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             var classToUpdate =
                 db.CharacterClasses.Find(id);
@@ -84,7 +85,7 @@ namespace MythRPG.Core
 
         public void DeleteClass(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             var characterClass =
                 db.CharacterClasses.Find(id);
@@ -101,7 +102,7 @@ namespace MythRPG.Core
 
         public void AddSpellColourToClass(int classId, int spellColourId)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             var characterClass =
                 db.CharacterClasses
@@ -129,7 +130,7 @@ namespace MythRPG.Core
 
         public void RemoveSpellColourFromClass(int classId, int spellColourId)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             var characterClass =
                 db.CharacterClasses
@@ -157,7 +158,7 @@ namespace MythRPG.Core
 
         public void AddTraitToClass(int classId, int traitId)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             var characterClass =
                 db.CharacterClasses
@@ -185,7 +186,7 @@ namespace MythRPG.Core
 
         public void RemoveTraitFromClass(int classId, int traitId)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             var characterClass =
                 db.CharacterClasses

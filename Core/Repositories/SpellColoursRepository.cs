@@ -1,6 +1,7 @@
-﻿using MythRPG.Data;
+﻿using MythRPG.Core.Interfaces;
+using MythRPG.Data;
 
-namespace MythRPG.Core
+namespace MythRPG.Core.Repositories
 {
     public class SpellColoursRepository : ISpellColoursRepository
     {
@@ -14,21 +15,21 @@ namespace MythRPG.Core
 
         public List<SpellColour> GetSpellColours()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             return db.SpellColours.ToList();
         }
 
         public SpellColour? GetSpellColourById(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             return db.SpellColours.Find(id);
         }
 
         public SpellColour? GetSpellColourByName(string name)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             return db.SpellColours
                 .FirstOrDefault(

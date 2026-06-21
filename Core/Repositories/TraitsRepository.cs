@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MythRPG.Core.Interfaces;
 using MythRPG.Data;
 
-namespace MythRPG.Core
+namespace MythRPG.Core.Repositories
 {
     public class TraitsRepository : ITraitsRepository
     {
@@ -12,19 +13,19 @@ namespace MythRPG.Core
         }
         public void AddTrait(Trait trait)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             db.Traits.Add(trait);
             db.SaveChanges();
         }
-        public void AddBonus (Bonus bonus)
+        public void AddBonus(Bonus bonus)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             db.Bonuses.Add(bonus);
             db.SaveChanges();
         }
         public void AddTraitToCharacter(int charId, Trait trait)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var characterToUpdate = db.Characters.Find(charId);
             if (characterToUpdate is not null)
             {
@@ -34,24 +35,24 @@ namespace MythRPG.Core
         }
         public List<Trait> GetTraits()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             return db.Traits.Include(e => e.Bonuses).ToList();
         }
         public List<Trait> ListTraits()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             return db.Traits.ToList();
         }
         public List<Bonus> GetBonuses()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             return db.Bonuses.ToList();
         }
         public Trait GetTraitById(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var trait = db.Traits.Find(id);
-            if (trait is not null)  return trait;
+            if (trait is not null) return trait;
             return new Trait
             {
                 Name = string.Empty
@@ -59,7 +60,7 @@ namespace MythRPG.Core
         }
         public Trait GetTraitBonusById(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             List<Trait> traits = GetTraits();
             foreach (var trait in traits)
             {
@@ -72,14 +73,14 @@ namespace MythRPG.Core
         }
         public Bonus? GetBonusById(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var bonus = db.Bonuses.Find(id);
             if (bonus is not null) return bonus;
             return null;
         }
         public Trait GetTraitByName(string name)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             List<Trait> traits = ListTraits();
             foreach (var trait in traits)
             {
@@ -92,7 +93,7 @@ namespace MythRPG.Core
         }
         public Trait GetTraitBonusByName(string name)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             List<Trait> traits = GetTraits();
             foreach (var trait in traits)
             {
@@ -107,7 +108,7 @@ namespace MythRPG.Core
         {
             if (trait == null) throw new ArgumentNullException(nameof(trait));
             if (id != trait.TraitId) return;
-            var db = this.contextFactory;
+            var db = contextFactory;
             var traitToUpdate = db.Traits.Find(id);
             if (traitToUpdate is not null)
             {
@@ -121,7 +122,7 @@ namespace MythRPG.Core
         }
         public void DeleteTrait(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var trait = db.Traits.Find(id);
             if (trait is null) return;
             db.Traits.Remove(trait);

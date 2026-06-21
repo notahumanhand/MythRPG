@@ -1,5 +1,4 @@
-﻿
-namespace MythRPG.Core
+﻿namespace MythRPG.Core.Interfaces
 {
     public interface ISpellsRepository
     {

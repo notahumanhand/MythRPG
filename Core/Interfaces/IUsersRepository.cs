@@ -1,6 +1,4 @@
-﻿using MythRPG.Core;
-
-namespace MythRPG.Core
+﻿namespace MythRPG.Core.Interfaces
 {
     public interface IUsersRepository
     {

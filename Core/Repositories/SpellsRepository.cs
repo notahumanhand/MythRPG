@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MythRPG.Core.Interfaces;
 using MythRPG.Data;
 
-namespace MythRPG.Core
+namespace MythRPG.Core.Repositories
 {
     public class SpellsRepository : ISpellsRepository
     {
@@ -12,7 +13,7 @@ namespace MythRPG.Core
         }
         public void AddSpell(Spell spell)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             if (spell.Colour is not null)
             {
                 spell.Colour =
@@ -25,7 +26,7 @@ namespace MythRPG.Core
         }
         public void AddSpellToCharacter(int charId, Spell spell)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var characterToUpdate = db.Characters.Find(charId);
             if (characterToUpdate is not null)
             {
@@ -35,7 +36,7 @@ namespace MythRPG.Core
         }
         public List<Spell> GetSpells()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             return db.Spells
                 .Include(s => s.Colour)
@@ -43,7 +44,7 @@ namespace MythRPG.Core
         }
         public Spell GetSpellById(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             var spell =
                 db.Spells
@@ -59,7 +60,7 @@ namespace MythRPG.Core
         }
         public Spell? GetSpellByName(string name)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             return db.Spells
                 .Include(s => s.Colour)
@@ -69,7 +70,7 @@ namespace MythRPG.Core
         {
             if (spell == null) throw new ArgumentNullException(nameof(spell));
             if (id != spell.SpellId) return;
-            var db = this.contextFactory;
+            var db = contextFactory;
             var spellToUpdate = db.Spells.Find(id);
             if (spellToUpdate is not null)
             {
@@ -87,7 +88,7 @@ namespace MythRPG.Core
         }
         public void DeleteSpell(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var spell = db.Spells.Find(id);
             if (spell is null) return;
             db.Spells.Remove(spell);

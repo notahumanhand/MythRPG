@@ -1,6 +1,7 @@
-﻿using MythRPG.Data;
+﻿using MythRPG.Core.Interfaces;
+using MythRPG.Data;
 
-namespace MythRPG.Core
+namespace MythRPG.Core.Repositories
 {
     public class UsersRepository : IUsersRepository
     {

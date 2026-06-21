@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MythRPG.Core.Interfaces;
 using MythRPG.Data;
 
-namespace MythRPG.Core
+namespace MythRPG.Core.Repositories
 {
     public class CharactersRepository : ICharactersRepository
     {
@@ -13,18 +14,18 @@ namespace MythRPG.Core
 
         public void AddCharacter(Character character)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             db.Characters.Add(character);
             db.SaveChanges();
         }
         public List<Character> GetCharacters()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             return db.Characters.Include(e => e.Traits).Include(c => c.Spells).ToList();
         }
         public List<Character> GetPublicCharacters()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
 
             return db.Characters
                 .Where(c => c.IsPublic)
@@ -34,7 +35,7 @@ namespace MythRPG.Core
         }
         public List<Character> ListCharacters()
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             return db.Characters.ToList();
         }
         public Character GetCharacterById(int id)
@@ -48,7 +49,7 @@ namespace MythRPG.Core
         }
         public void DeleteCharacter(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var character = db.Characters.Find(id);
             if (character is null) return;
             db.Characters.Remove(character);
@@ -56,7 +57,7 @@ namespace MythRPG.Core
         }
         public List<Character> GetCharactersByUserId(string userId)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             return db.Characters
                 .Where(c => c.UserId == userId)
                 .Include(c => c.Traits)
@@ -65,12 +66,12 @@ namespace MythRPG.Core
         }
         public List<Character> SearchCharacters(string name)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             return db.Characters.ToList();
         }
         public List<Character> GetCharactersByClass(string charclass)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             List<Character> characters = GetCharacters();
             List<Character> classcharacters = new List<Character>();
             foreach (var character in characters)
@@ -83,7 +84,7 @@ namespace MythRPG.Core
         {
             if (character == null) throw new ArgumentNullException(nameof(character));
             if (id != character.CharacterId) return;
-            var db = this.contextFactory;
+            var db = contextFactory;
             var characterToUpdate = db.Characters.Find(id);
             if (characterToUpdate is not null)
             {
@@ -109,7 +110,7 @@ namespace MythRPG.Core
         }
         public void RemoveTrait(int CharId, int TraitId)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var characterToUpdate = db.Characters.Find(CharId);
             var traitToRemove = db.Traits.Find(TraitId);
             if (characterToUpdate is not null && traitToRemove is not null)
@@ -120,7 +121,7 @@ namespace MythRPG.Core
         }
         public void RemoveSpell(int CharId, int SpellId)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var characterToUpdate = db.Characters.Find(CharId);
             var spellToRemove = db.Spells.Find(SpellId);
             if (characterToUpdate is not null && spellToRemove is not null)
@@ -131,7 +132,7 @@ namespace MythRPG.Core
         }
         public void LevelUpCharacter(int id)
         {
-            var db = this.contextFactory;
+            var db = contextFactory;
             var character = db.Characters.Find(id);
             if (character is not null && character.CharacterLevel < 20) character.CharacterLevel += 1;
         }
