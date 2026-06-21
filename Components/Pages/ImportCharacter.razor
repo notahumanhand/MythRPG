@@ -33,7 +33,7 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label for="class">Class</label>
-                <InputSelect id="class" @bind-Value="character.CharacterClass" class="form-control" readonly>
+                    <InputSelect id="class" @bind-Value="character.LegacyClass" class="form-control" readonly>
                     <ClassSelectOptionComponent></ClassSelectOptionComponent>
                 </InputSelect>
             </div>
@@ -156,7 +156,7 @@
                         character.CharacterLevel = int.Parse(val);
                         break;
                     case "CharacterClass":
-                        character.CharacterClass = val;
+                        character.LegacyClass = val;
                         break;
                     case "MythicPath":
                         character.MythicPath = val;

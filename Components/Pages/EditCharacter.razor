@@ -56,7 +56,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="class">Class</label>
-                <select id="class" @bind="character.CharacterClass" class="form-control">
+                <select id="class" @bind="character.LegacyClass" class="form-control">
                     <ClassSelectOptionComponent></ClassSelectOptionComponent>
                 </select>
             </div>
@@ -156,7 +156,7 @@
         <div class="col-md-6">
             <h3>Spells</h3>
             <p>Your Colours</p>
-            <ListSpellColoursComponent charclass="@character.CharacterClass"></ListSpellColoursComponent>
+            <ListSpellColoursComponent charclass="@character.LegacyClass"></ListSpellColoursComponent>
             <ListSpellsComponent spells="@character.Spells" charId="@character.CharacterId" mode="TraitsSpellsDisplayMode.CharacterEdit"></ListSpellsComponent>
             <h4>Add Spell</h4>
             <div class="border border-dark m-2 p-2 rounded">

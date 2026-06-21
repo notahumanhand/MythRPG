@@ -76,7 +76,7 @@ namespace MythRPG.Core.Repositories
             List<Character> classcharacters = new List<Character>();
             foreach (var character in characters)
             {
-                if (character.CharacterClass == charclass) classcharacters.Add(character);
+                if (character.LegacyClass == charclass) classcharacters.Add(character);
             }
             return classcharacters;
         }
@@ -89,7 +89,7 @@ namespace MythRPG.Core.Repositories
             if (characterToUpdate is not null)
             {
                 characterToUpdate.IsPublic = character.IsPublic;
-                characterToUpdate.CharacterClass = character.CharacterClass;
+                characterToUpdate.LegacyClass = character.LegacyClass;
                 characterToUpdate.CharacterLevel = character.CharacterLevel;
                 characterToUpdate.CharacterName = character.CharacterName;
                 characterToUpdate.MythicPath = character.MythicPath;

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MythRPG.Data;
 
@@ -11,9 +12,11 @@ using MythRPG.Data;
 namespace MythRPG.Migrations
 {
     [DbContext(typeof(MythRPGContext))]
-    partial class MythRPGContextModelSnapshot : ModelSnapshot
+    [Migration("20260621190724_ClassIntegrationPrep")]
+    partial class ClassIntegrationPrep
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -266,9 +269,6 @@ namespace MythRPG.Migrations
                     b.Property<string>("Armour")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CharacterClassId")
-                        .HasColumnType("int");
-
                     b.Property<int>("CharacterLevel")
                         .HasColumnType("int");
 
@@ -320,8 +320,6 @@ namespace MythRPG.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CharacterId");
-
-                    b.HasIndex("CharacterClassId");
 
                     b.HasIndex("UserId");
 
@@ -713,15 +711,9 @@ namespace MythRPG.Migrations
 
             modelBuilder.Entity("MythRPG.Core.Character", b =>
                 {
-                    b.HasOne("MythRPG.Core.CharacterClass", "CharacterClass")
-                        .WithMany()
-                        .HasForeignKey("CharacterClassId");
-
                     b.HasOne("MythRPG.Core.User", null)
                         .WithMany("Characters")
                         .HasForeignKey("UserId");
-
-                    b.Navigation("CharacterClass");
                 });
 
             modelBuilder.Entity("MythRPG.Core.Spell", b =>

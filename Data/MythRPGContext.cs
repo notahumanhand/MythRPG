@@ -40,6 +40,8 @@ namespace MythRPG.Data
             modelBuilder.Entity<Character>()
                 .HasMany(e => e.Spells)
                 .WithMany();
+            modelBuilder.Entity<Character>()
+                .HasOne(c => c.CharacterClass);
             modelBuilder.Entity<Trait>()
                 .HasMany(e => e.Bonuses)
                 .WithMany();
