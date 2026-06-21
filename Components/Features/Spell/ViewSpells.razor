@@ -109,7 +109,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="description">Description</label>
+                <label for="description">Effect</label>
                 <InputTextArea id="description" @bind-Value="spell.Effect" class="form-control"></InputTextArea>
             </div>
             <br />
@@ -151,7 +151,9 @@
             }
         </div>
         <h5>Effect</h5>
-        <p>@spell.Effect</p>
+        <div>
+            @MarkdownHelper.ToMarkup(spell.Effect)
+        </div>
     </div>
     </Authorized>
     <NotAuthorized>

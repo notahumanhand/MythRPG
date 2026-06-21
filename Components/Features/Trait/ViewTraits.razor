@@ -106,7 +106,9 @@
                 <p>@string.Join(", ", classes.Where(c => selectedClassIds.Contains(c.CharacterClassId)).Select(c => c.Name))</p>
             }
             <h5>Description</h5>
-            <p>@trait.Description</p>
+                <div>
+                    @MarkdownHelper.ToMarkup(trait.Description)
+                </div>
             <h5>Bonuses</h5>
             <ListBonusesComponent bonuses="@trait.Bonuses" showId="false"></ListBonusesComponent>
             <br />

@@ -35,14 +35,9 @@ else
             </div>
 
             <h5>Description</h5>
-            @if (!string.IsNullOrWhiteSpace(characterClass.Description))
-            {
-                <p>
-                    @(characterClass.Description.Length > 250
-                        ? characterClass.Description.Substring(0, 250) + "..."
-                        : characterClass.Description)
-                </p>
-            }
+            <div>
+                @MarkdownHelper.ToMarkup(characterClass.Description)
+            </div>
 
             <h5>Primary Bonus</h5>
             <p>@characterClass.PrimaryBonus</p>

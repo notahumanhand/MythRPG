@@ -95,7 +95,9 @@ else
                 <ListBonusesComponent bonuses="@trait.Bonuses" showId="false"></ListBonusesComponent>
             }
             <h5>Description</h5>
-            <p>@trait.Description</p>
+            <div>
+                @MarkdownHelper.ToMarkup(trait.Description)
+            </div>
         </div>
     }
 }

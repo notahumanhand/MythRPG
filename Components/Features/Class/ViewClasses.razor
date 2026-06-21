@@ -84,7 +84,9 @@
 
                 <div>
                     <h5>Description</h5>
-                    <p>@characterClass.Description</p>
+                    <div>
+                        @MarkdownHelper.ToMarkup(characterClass.Description)
+                    </div>
                 </div>
 
                 <div>

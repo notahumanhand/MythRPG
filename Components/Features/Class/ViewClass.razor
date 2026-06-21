@@ -29,7 +29,9 @@
 
     <div class="border border-dark m-2 p-2 rounded">
         <h5>Description</h5>
-        <p>@characterClass.Description</p>
+        <div>
+            @MarkdownHelper.ToMarkup(characterClass.Description)
+        </div>
     </div>
     
     <div class="border border-dark m-2 p-2 rounded">
