@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "Admin")]
 @inject ITraitsRepository TraitsRepository
+@inject IClassesRepository ClassesRepository
 
 <PageTitle>Mythmaven: Edit Trait</PageTitle>
 
@@ -34,6 +35,28 @@
         <div class="col-md-4">
         </div>
     </div>
+    <div class="form-group mt-3">
+        <h5>Eligible Classes</h5>
+
+        <p>
+            Leave all classes unchecked to make this trait available to all classes.
+        </p>
+
+        @foreach (var characterClass in classes)
+        {
+            <div class="form-check">
+                <input type="checkbox"
+                       class="form-check-input"
+                       checked="@IsClassSelected(characterClass.CharacterClassId)"
+                       @onchange="@(e => ToggleClass(characterClass.CharacterClassId, e.Value))" />
+
+                <label class="form-check-label">
+                    @characterClass.Name
+                </label>
+            </div>
+        }
+
+    </div>
     <div class="form-group">
         <label for="desc">Description</label>
         <input type="textarea" id="desc" @bind="trait.Description" class="form-control"></input>
@@ -57,16 +80,47 @@
 
     private bool confirmText = false;
 
+    private List<CharacterClass> classes = new();
+
+    private List<int> selectedClassIds = new();
+
     protected override void OnParametersSet()
     {
         trait = TraitsRepository.GetTraitById(TraitId);
+
+        classes = ClassesRepository.GetClasses();
+
+        selectedClassIds = trait.EligibleClasses.Select(c => c.CharacterClassId).ToList();
+    }
+
+    private bool IsClassSelected(int classId)
+    {
+        return selectedClassIds.Contains(classId);
+    }
+
+    private void ToggleClass(int classId, object? value)
+    {
+        bool selected = bool.TryParse(value?.ToString(), out bool result) && result;
+
+        if (selected)
+        {
+            if (!selectedClassIds.Contains(classId))
+            {
+                selectedClassIds.Add(classId);
+            }
+        }
+        else
+        {
+            selectedClassIds.Remove(classId);
+        }
     }
 
     void Update()
     {
-        TraitsRepository.UpdateTrait(TraitId, trait);
+        TraitsRepository.UpdateTrait(TraitId, trait, selectedClassIds);
         confirmText = true;
     }
+
     void ClearAlert()
     {
         confirmText = false;

@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @inject ITraitsRepository TraitsRepository
+@inject IClassesRepository ClassesRepository
 
 <PageTitle>Mythmaven: Traits</PageTitle>
 
@@ -36,6 +37,28 @@
                     </div>
                 </div>
             </div>
+                <div class="form-group">
+                    <h5>Eligible Classes</h5>
+
+                    <p>
+                        Leave all classes unchecked to make this trait
+                        available to all classes.
+                    </p>
+
+                    @foreach (var characterClass in classes)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@selectedClassIds.Contains(characterClass.CharacterClassId)"
+                                   @onchange="@(e => ToggleClass(characterClass.CharacterClassId, e.Value))" />
+
+                            <label class="form-check-label">
+                                @characterClass.Name
+                            </label>
+                        </div>
+                    }
+                </div>
             <div class="form-group">
                 <label for="description">Description</label>
                 <InputTextArea id="description" @bind-Value="trait.Description" class="form-control"></InputTextArea>
@@ -73,6 +96,15 @@
                     @trait.ActionCost
                 </div>
             </div>
+            <h5>Eligible Classes</h5>
+            @if (selectedClassIds.Count == 0)
+            {
+                <p>All Classes</p>
+            }
+            else
+            {
+                <p>@string.Join(", ", classes.Where(c => selectedClassIds.Contains(c.CharacterClassId)).Select(c => c.Name))</p>
+            }
             <h5>Description</h5>
             <p>@trait.Description</p>
             <h5>Bonuses</h5>
@@ -102,10 +134,15 @@
 
     List<Bonus> bonuses = new List<Bonus>();
 
+    List<CharacterClass> classes = new();
+
+    List<int> selectedClassIds = new();
+
     protected override void OnParametersSet()
     {
         traits = TraitsRepository.GetTraits();
         bonuses = TraitsRepository.GetBonuses();
+        classes = ClassesRepository.GetClasses();
     }
     private string SelectedBonus()
     {
@@ -129,11 +166,25 @@
     }
     private void Create()
     {
-        TraitsRepository.AddTrait(trait);
-        trait = new Trait
-            {
-                Name = string.Empty
-            };
+        TraitsRepository.AddTrait(trait, selectedClassIds);
+        trait = new Trait { Name = string.Empty, EligibleClasses = new() };
+        selectedClassIds = new();
         traits = TraitsRepository.GetTraits();
+    }
+    private void ToggleClass(int classId, object? value)
+    {
+        bool selected = bool.TryParse(value?.ToString(), out bool result) && result;
+
+        if (selected)
+        {
+            if (!selectedClassIds.Contains(classId))
+            {
+                selectedClassIds.Add(classId);
+            }
+        }
+        else
+        {
+            selectedClassIds.Remove(classId);
+        }
     }
 }

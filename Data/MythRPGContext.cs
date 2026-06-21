@@ -43,12 +43,17 @@ namespace MythRPG.Data
             modelBuilder.Entity<Trait>()
                 .HasMany(e => e.Bonuses)
                 .WithMany();
+            modelBuilder.Entity<Trait>()
+                .HasMany(t => t.EligibleClasses)
+                .WithMany()
+                .UsingEntity("TraitEligibleClasses");
             modelBuilder.Entity<SpellColour>()
                 .HasIndex(c => c.Name)
                 .IsUnique();
             modelBuilder.Entity<CharacterClass>()
                 .HasMany(c => c.GrantedTraits)
-                .WithMany();
+                .WithMany()
+                .UsingEntity("CharacterClassGrantedTraits");
             modelBuilder.Entity<CharacterClass>()
                 .HasMany(c => c.SpellColours)
                 .WithMany();

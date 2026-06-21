@@ -9,6 +9,7 @@
         public string? ActionCost { get; set; }
         public string? ResourceCost { get; set; }
         public List<Bonus> Bonuses { get; set; } = new List<Bonus>();
+        public List<CharacterClass> EligibleClasses { get; set; } = new();
 
     }
 }

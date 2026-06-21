@@ -3,6 +3,7 @@
     public interface ITraitsRepository
     {
         void AddTrait(Trait trait);
+        void AddTrait(Trait trait, List<int> eligibleClassIds);
         void AddTraitToCharacter(int charId, Trait trait);
         void AddBonus(Bonus bonus);
         void DeleteTrait(int id);
@@ -15,5 +16,7 @@
         Trait GetTraitByName(string name);
         Trait GetTraitBonusByName(string name);
         void UpdateTrait(int id, Trait trait);
+        void UpdateTrait(int id, Trait trait, List<int> eligibleClassIds);
+        List<Trait> GetAvailableTraitsForClass(int classId);
     }
 }

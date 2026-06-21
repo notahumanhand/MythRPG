@@ -71,6 +71,10 @@ else
                 <h4>@trait.Name</h4>
                 <br />
             }
+            @if (string.Equals(trait.Source, "Class Trait", StringComparison.OrdinalIgnoreCase))
+            {
+                <h5><b>Class:</b> @ClassDisplay(trait)</h5>
+            }
             <div class="row">
                 <div class="col-md-4 border border-dark p-2 rounded" style="background: #EEECE5;">
                     <b>Source</b><br>
@@ -133,5 +137,19 @@ else
         traits.Remove(trait);
 
         StateHasChanged();
+    }
+    private string ClassDisplay(Trait trait)
+    {
+        if (!string.Equals(trait.Source, "Class Trait", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
+
+        if (trait.EligibleClasses.Count == 0)
+        {
+            return "All";
+        }
+
+        return string.Join(", ", trait.EligibleClasses.Select(c => c.Name).OrderBy(n => n));
     }
 }
