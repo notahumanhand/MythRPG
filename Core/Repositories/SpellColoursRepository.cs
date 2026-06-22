@@ -31,10 +31,7 @@ namespace MythRPG.Core.Repositories
         {
             var db = contextFactory;
 
-            return db.SpellColours
-                .FirstOrDefault(
-                    c => c.Name != null &&
-                         c.Name.Equals(name));
+            return db.SpellColours.FirstOrDefault(c => c.Name != null && c.Name.Equals(name));
         }
     }
 }

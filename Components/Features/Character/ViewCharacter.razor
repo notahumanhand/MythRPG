@@ -256,9 +256,7 @@
 
         foreach (var trait in character.Traits)
         {
-            Trait fullTrait =
-                TraitsRepository.GetTraitBonusById(
-                    trait.TraitId);
+            Trait fullTrait = TraitsRepository.GetTraitById(trait.TraitId);
 
             charactertraits.Add(fullTrait);
         }

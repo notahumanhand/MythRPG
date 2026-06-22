@@ -11,17 +11,11 @@ namespace MythRPG.Core.Repositories
         {
             this.contextFactory = contextFactory;
         }
-        public void AddTrait(Trait trait)
-        {
-            var db = contextFactory;
-            db.Traits.Add(trait);
-            db.SaveChanges();
-        }
-        public void AddTrait(Trait trait, List<int> eligibleClassIds)
+        public void AddTrait(Trait trait, List<int>? eligibleClassIds)
         {
             var db = contextFactory;
 
-            if (eligibleClassIds.Count > 0)
+            if (eligibleClassIds is not null && eligibleClassIds.Count > 0)
             {
                 var selectedClasses = db.CharacterClasses.Where(c => eligibleClassIds.Contains(c.CharacterClassId)).ToList();
 
@@ -32,7 +26,6 @@ namespace MythRPG.Core.Repositories
             }
 
             db.Traits.Add(trait);
-
             db.SaveChanges();
         }
         public void AddBonus(Bonus bonus)
@@ -66,67 +59,20 @@ namespace MythRPG.Core.Repositories
             var db = contextFactory;
             return db.Bonuses.ToList();
         }
-        public Trait GetTraitById(int id)
-        {
-            List<Trait> traits = GetTraits();
-
-            foreach (var trait in traits)
-            {
-                if (trait.TraitId == id)
-                {
-                    return trait;
-                }
-            }
-            return new Trait
-            {
-                Name = string.Empty
-            };
-        }
-        public Trait GetTraitBonusById(int id)
+        public Trait? GetTraitById(int id)
         {
             var db = contextFactory;
-            List<Trait> traits = GetTraits();
-            foreach (var trait in traits)
-            {
-                if (trait.TraitId == id) return trait;
-            }
-            return new Trait
-            {
-                Name = string.Empty
-            };
+            return db.Traits.Include(t => t.EligibleClasses).FirstOrDefault(t => t.TraitId == id);
         }
         public Bonus? GetBonusById(int id)
         {
             var db = contextFactory;
-            var bonus = db.Bonuses.Find(id);
-            if (bonus is not null) return bonus;
-            return null;
+            return db.Bonuses.Find(id);
         }
-        public Trait GetTraitByName(string name)
+        public Trait? GetTraitByName(string name)
         {
             var db = contextFactory;
-            List<Trait> traits = ListTraits();
-            foreach (var trait in traits)
-            {
-                if (trait.Name is not null && trait.Name.Equals(name)) return trait;
-            }
-            return new Trait
-            {
-                Name = string.Empty
-            };
-        }
-        public Trait GetTraitBonusByName(string name)
-        {
-            var db = contextFactory;
-            List<Trait> traits = GetTraits();
-            foreach (var trait in traits)
-            {
-                if (trait.Name is not null && trait.Name.Equals(name)) return trait;
-            }
-            return new Trait
-            {
-                Name = string.Empty
-            };
+            return db.Traits.FirstOrDefault(t => t.Name == name);
         }
         public void UpdateTrait(int id, Trait trait)
         {
@@ -153,7 +99,7 @@ namespace MythRPG.Core.Repositories
                 db.SaveChanges();
             }
         }
-        public void UpdateTrait(int id, Trait trait, List<int> eligibleClassIds)
+        public void UpdateTrait(int id, Trait trait, List<int>? eligibleClassIds)
         {
             if (trait == null)
             {
@@ -167,11 +113,7 @@ namespace MythRPG.Core.Repositories
 
             var db = contextFactory;
 
-            var traitToUpdate =
-                db.Traits
-                    .Include(t => t.EligibleClasses)
-                    .FirstOrDefault(
-                        t => t.TraitId == id);
+            var traitToUpdate = db.Traits.Include(t => t.EligibleClasses).FirstOrDefault(t => t.TraitId == id);
 
             if (traitToUpdate is null)
             {
@@ -183,22 +125,15 @@ namespace MythRPG.Core.Repositories
             traitToUpdate.Description = trait.Description;
             traitToUpdate.ResourceCost = trait.ResourceCost;
             traitToUpdate.ActionCost = trait.ActionCost;
-
             traitToUpdate.EligibleClasses.Clear();
 
-            if (eligibleClassIds.Count > 0)
+            if (eligibleClassIds is not null && eligibleClassIds.Count > 0)
             {
-                var selectedClasses =
-                    db.CharacterClasses
-                        .Where(c =>
-                            eligibleClassIds.Contains(
-                                c.CharacterClassId))
-                        .ToList();
+                var selectedClasses = db.CharacterClasses.Where(c => eligibleClassIds.Contains(c.CharacterClassId)).ToList();
 
                 foreach (var characterClass in selectedClasses)
                 {
-                    traitToUpdate.EligibleClasses.Add(
-                        characterClass);
+                    traitToUpdate.EligibleClasses.Add(characterClass);
                 }
             }
 
@@ -214,14 +149,8 @@ namespace MythRPG.Core.Repositories
         }
         public List<Trait> GetAvailableTraitsForClass(int classId)
         {
-            List<Trait> traits = GetTraits();
-
-            return traits
-                .Where(t =>
-                    t.EligibleClasses.Count == 0 ||
-                    t.EligibleClasses.Any(
-                        c => c.CharacterClassId == classId))
-                .ToList();
+            var db = contextFactory;
+            return db.Traits.Where(t => !t.EligibleClasses.Any() || t.EligibleClasses.Any(c => c.CharacterClassId == classId)).ToList();
         }
     }
 }

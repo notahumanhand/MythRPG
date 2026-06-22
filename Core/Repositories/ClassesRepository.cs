@@ -39,7 +39,7 @@ namespace MythRPG.Core.Repositories
             return db.CharacterClasses.ToList();
         }
 
-        public CharacterClass GetClassById(int id)
+        public CharacterClass? GetClassById(int id)
         {
             List<CharacterClass> classes = GetClasses();
 
@@ -51,7 +51,7 @@ namespace MythRPG.Core.Repositories
                 }
             }
 
-            return new CharacterClass();
+            return null;
         }
 
         public void UpdateClass(int id, CharacterClass characterClass)

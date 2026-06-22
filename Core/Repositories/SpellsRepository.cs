@@ -42,29 +42,17 @@ namespace MythRPG.Core.Repositories
                 .Include(s => s.Colour)
                 .ToList();
         }
-        public Spell GetSpellById(int id)
+        public Spell? GetSpellById(int id)
         {
             var db = contextFactory;
 
-            var spell =
-                db.Spells
-                    .Include(s => s.Colour)
-                    .FirstOrDefault(s => s.SpellId == id);
-
-            if (spell is not null)
-            {
-                return spell;
-            }
-
-            return new Spell();
+            return db.Spells.Include(s => s.Colour).FirstOrDefault(s => s.SpellId == id);
         }
         public Spell? GetSpellByName(string name)
         {
             var db = contextFactory;
 
-            return db.Spells
-                .Include(s => s.Colour)
-                .FirstOrDefault(s => s.Name == name);
+            return db.Spells.Include(s => s.Colour).FirstOrDefault(s => s.Name == name);
         }
         public void UpdateSpell(int id, Spell spell)
         {
