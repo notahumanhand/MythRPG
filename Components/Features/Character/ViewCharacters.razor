@@ -1,0 +1,65 @@
+﻿@page "/characters"
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<User> UserManager
+@inject ICharactersRepository CharactersRepository
+
+<PageTitle>Mythmaven: Characters</PageTitle>
+
+<h3>Characters</h3>
+
+@if (characters is not null)
+{
+    <CharacterListComponent characters="characters" Mode="DisplayMode" CurrentUserId="CurrentUserId" UserNames="UserNames"></CharacterListComponent>
+}
+
+@code {
+    private List<Character>? characters;
+
+    private Dictionary<string, string> UserNames = new();
+
+    private string? CurrentUserId;
+
+    private CharacterDisplayMode DisplayMode = CharacterDisplayMode.Display;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+        var user = authState.User;
+
+        bool isAuthenticated = user.Identity?.IsAuthenticated == true;
+
+        if (isAuthenticated)
+        {
+            CurrentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        }
+
+        bool isAdmin = isAuthenticated && user.IsInRole("Admin");
+
+        if (isAdmin)
+        {
+            DisplayMode = CharacterDisplayMode.Admin;
+            characters = CharactersRepository.GetCharacters();
+        }
+        else
+        {
+            DisplayMode = CharacterDisplayMode.Display;
+            characters = CharactersRepository.GetPublicCharacters();
+        }
+
+        foreach (var character in characters)
+        {
+            if (!string.IsNullOrEmpty(character.UserId) && !UserNames.ContainsKey(character.UserId))
+            {
+                var owner = await UserManager.FindByIdAsync(character.UserId);
+
+                UserNames[character.UserId] = owner?.UserName ?? "Unknown";
+            }
+        }
+    }
+}

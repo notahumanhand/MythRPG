@@ -17,6 +17,7 @@
                 <th scope="col" class="bg-transparent">Id</th>
                 <th scope="col" class="bg-transparent">Username</th>
                 <th scope="col" class="bg-transparent">Characters</th>
+                    <th scope="col" class="bg-transparent">Collection</th>
                 <th scope="col" class="bg-transparent"></th>
                 <th scope="col" class="bg-transparent"></th>
             </tr>
@@ -29,6 +30,12 @@
                     <td class="bg-transparent">@user.UserName</td>
                     <td class="bg-transparent">
                         @string.Join(", ", user.Characters.Select(c => c.CharacterName))
+                    </td>
+                    <td class="bg-transparent">
+                        @if (!spectatorIds.Contains(user.Id))
+                        {
+                            <a class="btn btn-secondary" href="/@user.Id/characters">View</a>
+                        }
                     </td>
                     <td class="bg-transparent">
                         <a class="btn btn-primary" href="/manage/@user.Id">Edit</a>
@@ -50,9 +57,18 @@
     public List<User> users = new List<User>();
     private User newuser = new User { UserName = "" };
     private string text = "";
-    protected override void OnInitialized()
+    private HashSet<string> spectatorIds = new();
+    protected override async Task OnInitializedAsync()
     {
         users = UsersRepository.GetUsers();
+
+        foreach (var user in users)
+        {
+            if (await UserManager.IsInRoleAsync(user, "Spectator"))
+            {
+                spectatorIds.Add(user.Id);
+            }
+        }
     }
     private async Task DeleteUser(string id)
     {

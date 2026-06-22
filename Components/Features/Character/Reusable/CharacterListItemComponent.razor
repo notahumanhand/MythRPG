@@ -1,13 +1,13 @@
 @if (this.Character is not null)
 {
     <div class="align-items-center border border-dark rounded p-5">
-        @if (!IsSpectator)
+        @if (ShowPortrait)
         {
             <img src="@(Character.PortraitUrl ?? PortraitsRef.Default)" width="100" />
         }
-        @if (IsSpectator && !string.IsNullOrEmpty(Character.UserId))
+        @if (ShowOwnerName && !string.IsNullOrEmpty(Character.UserId))
         {
-            <small class="text-muted">@UserNames.GetValueOrDefault(Character.UserId, "Unknown")</small>
+            <a href="/@Character.UserId/characters">@UserNames.GetValueOrDefault(Character.UserId, "Unknown")</a>
             <br />
         }
         <h3>@Character.CharacterName</h3>
@@ -18,7 +18,7 @@
         </b>
         <br />
         <a class="btn btn-light" href="/character-sheet/@Character.CharacterId">View</a>
-        @if (!IsSpectator)
+        @if (CanEdit)
         {
         <a class="btn btn-primary" href="/character-sheet/edit/@Character.CharacterId">Edit</a>
         <a class="btn btn-danger" href="/delete/@Character.CharacterId">Delete</a>
@@ -30,8 +30,27 @@
     [Parameter]
     public Character? Character { get; set; }
     [Parameter]
-    public bool IsSpectator { get; set; }
+    public required CharacterDisplayMode Mode { get; set; }
+    [Parameter]
+    public string? CurrentUserId { get; set; }
     [Parameter]
     public Dictionary<string, string> UserNames
     { get; set; } = new();
+
+    private bool CanEdit => Character is not null && (Mode == CharacterDisplayMode.Admin || ( !string.IsNullOrEmpty(CurrentUserId) && Character.UserId == CurrentUserId));
+
+    private bool ShowPortrait =>
+    Mode switch
+    {
+        CharacterDisplayMode.Admin => false,
+        _ => true
+    };
+
+    private bool ShowOwnerName =>
+        Mode switch
+        {
+            CharacterDisplayMode.Display => true,
+            CharacterDisplayMode.Admin => true,
+            _ => false
+        };
 }

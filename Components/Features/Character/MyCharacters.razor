@@ -1,0 +1,106 @@
+﻿@page "/{UserId}/characters"
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+
+@inject UserManager<User> UserManager
+@inject NavigationManager NavigationManager
+@inject ICharactersRepository CharactersRepository
+
+<PageTitle>Mythmaven: Characters</PageTitle>
+
+@if (PageReady)
+{
+    <h3>@PageTitle</h3>
+
+    @if (characters is not null)
+    {
+        <CharacterListComponent characters="characters" Mode="DisplayMode" CurrentUserId="CurrentUserId">
+        </CharacterListComponent>
+    }
+
+    @if (DisplayMode == CharacterDisplayMode.User)
+    {
+        <br />
+        <br />
+
+        <a href="/create-character"
+           class="btn btn-success">
+            Create Character
+        </a>
+
+        <a href="/import-character"
+           class="btn btn-primary">
+            Import Character
+        </a>
+    }
+}
+
+@code {
+    [Parameter]
+    public required string UserId { get; set; }
+
+    private List<Character>? characters;
+
+    private string? CurrentUserId;
+
+    private string PageTitle = "Characters";
+
+    private bool PageReady;
+
+    private CharacterDisplayMode DisplayMode = CharacterDisplayMode.Collection;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        PageReady = false;
+
+        var targetUser = await UserManager.FindByIdAsync(UserId);
+
+        if (targetUser is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        if (await UserManager.IsInRoleAsync(targetUser, "Spectator"))
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        PageTitle = $"{targetUser.UserName}'s Characters";
+
+        var authState = await AuthState;
+        var user = authState.User;
+
+        bool isAuthenticated = user.Identity?.IsAuthenticated == true;
+
+        bool isAdmin = false;
+
+        if (isAuthenticated)
+        {
+            CurrentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = user.IsInRole("Admin");
+        }
+
+        bool isOwner = CurrentUserId == UserId;
+
+        var userCharacters = CharactersRepository.GetCharactersByUserId(UserId);
+
+        if (isOwner || isAdmin)
+        {
+            characters = userCharacters;
+            DisplayMode = CharacterDisplayMode.User;
+        }
+        else
+        {
+            characters = userCharacters.Where(c => c.IsPublic).ToList();
+            DisplayMode = CharacterDisplayMode.Collection;
+        }
+
+        PageReady = true;
+    }
+}

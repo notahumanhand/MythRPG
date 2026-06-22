@@ -47,6 +47,13 @@
         }
         <button class="btn btn-success" @onclick="UpdateProfilePicture">Save Profile Picture</button>
     </div>
+        <AuthorizeView Roles="Admin" Context="adminContext">
+            <Authorized>
+                <br />
+                <br />
+                <a href="/accounts" class="btn btn-danger">Manage Accounts</a>
+            </Authorized>
+        </AuthorizeView>
     </Authorized>
 </AuthorizeView>
 

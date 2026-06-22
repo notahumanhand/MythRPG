@@ -1,136 +1,147 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Identity
-@attribute [Authorize]
-@inject UserManager<User> UserManager
+@using System.Security.Claims
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUsersRepository UsersRepository
 @inject ICharactersRepository CharactersRepository
+@inject IClassesRepository ClassesRepository
+@inject ITraitsRepository TraitsRepository
+@inject ISpellsRepository SpellsRepository
 
 <PageTitle>Mythmaven: Home</PageTitle>
 
 <h1 class="title">Mythmaven: Home</h1>
+<div class="row mb-4">
+    <div class="col">
+        <a href="/characters" class="btn btn-light w-100">
+            Characters
+        </a>
+    </div>
+    <div class="col">
+        <a href="/classes" class="btn btn-light w-100">
+            Classes
+        </a>
+    </div>
+    <div class="col">
+        <a href="/mythics" class="btn btn-light w-100">
+            Mythic Paths
+        </a>
+    </div>
+    <div class="col">
+        <a href="/traits" class="btn btn-light w-100">
+            Traits
+        </a>
+    </div>
+    <div class="col">
+        <a href="/spells" class="btn btn-light w-100">
+            Spells
+        </a>
+    </div>
+</div>
+
+<h2>Welcome to Mythmaven!</h2>
+<div class="row">
+    <div class="col-md-10">
+        <p>
+            This is a website for character creation and tracking, campaign management,
+            and system/rules reference for the TTRPG Mythmaven. It was made with the author's custom setting, Dulūn, in mind.
+            Though games in Mythmaven do not have to be set within Dulūn, the system is built for this setting, and thus many
+            of the traits and abilities will be tied to the world’s lore. The genre of Mythmaven (and Dulūn) is high fantasy,
+            with magic a fairly prominent force within the word.
+        </p>
+        <p>
+            The full player's handbook for Mythmaven can be found <a href="https://docs.google.com/document/d/12QiDSQ42_H0CdFenRrLVj-pLQkCN9apGFT0bMFzJs_c/edit?usp=sharing" target="_blank">here</a>.
+        </p>
+        <p>
+            Read about Dulūn's lore <a href="https://www.worldanvil.com/w/the-library-of-dulC5ABn-notahumanhand" target="_blank">here</a>.
+        </p>
+    </div>
+
+    <div class="col-md-2">
+        <h5>Mythmaven At A Glance</h5>
+        <p>
+            <b>@UserCount</b> Users •
+            <b>@CharacterCount</b> Characters •
+            <b>@PublicCharacterCount</b> Public Characters •
+            <b>@ClassCount</b> Classes •
+            <b>@TraitCount</b> Traits •
+            <b>@SpellCount</b> Spells
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h3>What's New?</h3>
+        <ul>
+            <li><b>22/06/2026</b> - Homepage Redesign</li>
+            <li><b>21/06/2026</b> - New classes page & support for class-granted traits</li>
+            <li><b>21/06/2026</b> - Class, trait, & spell descriptions now support markdown formatting</li>
+            <li><b>20/06/2026</b> - Character sheet viewing for spectators and character privacy toggle</li>
+            <li><b>27/04/2026</b> - Character & user portraits</li>
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <h3>Coming Soon!</h3>
+        <ol>
+            <li>Trait system revisions</li>
+            <li>Search & filtering functionalities for traits & spells</li>
+            <li>Mythic paths page & character support</li>
+            <li>Campaign management</li>
+            <li>Dice roller</li>
+        </ol>
+    </div>
+</div>
+
+
 <AuthorizeView>
     <Authorized>
-        @if (IsSpectator)
-        {
-            <h2>Public Characters</h2>
-        }
-        else
-        {
-            <h2>Your Characters</h2>
-        }
-        <CharacterListComponent characters="characters" IsSpectator="IsSpectator" UserNames="UserNames"></CharacterListComponent>
-        <br />
-        <br />
-        <AuthorizeView Roles="Admin" Context="adminContext">
-            <Authorized>
-                @if (allCharacters is not null)
-                {
-                    <hr />
-                    <h3>All Characters</h3>
-                    <CharacterListComponent characters="allCharacters" IsSpectator="true" UserNames="UserNames"></CharacterListComponent>
-                }
-            </Authorized>
-        </AuthorizeView>
-        <br />
-        <br />
-        @if (!IsSpectator)
-        {
-            <a href="/create-character"
-               class="btn btn-success">
-                Create Character
-            </a>
+        <h3>Quick Start</h3>
 
-            <a href="/import-character"
-               class="btn btn-primary">
-                Import Character
-            </a>
+        <a href="/create-character" class="btn btn-success">
+            Create Character
+        </a>
 
-            <br />
-            <br />
+        <a href="@($"/{CurrentUserId}/characters")" class="btn btn-primary">
+            My Characters
+        </a>
 
-            <a href="/profile"
-               class="btn btn-primary">
-                My Profile
-            </a>
-        }
-        <AuthorizeView Roles="Admin" Context="adminContext">
-            <Authorized>
-                <a href="/accounts" class="btn btn-danger">Manage Accounts</a>
-            </Authorized>
-        </AuthorizeView>
+        <a href="/characters" class="btn btn-secondary">
+            Browse Characters
+        </a>
     </Authorized>
     <NotAuthorized>
-        <p>You are logged out.</p>
-        <a href="/login" class="btn btn-primary">Log In</a>
+        <a href="/login" class="btn btn-sm btn-outline-light w-100">
+            Log In
+        </a>
     </NotAuthorized>
 </AuthorizeView>
 
+<br />
+<br />
+<p>Mythmaven Website & System designed and created by notahumanhand (spleen)</p>
+
 @code {
-    private List<Character>? characters;
-    private List<Character>? allCharacters;
-    private Dictionary<string, string> UserNames = new();
-    private bool loggedIn = false;
-    private bool IsSpectator;
-    [CascadingParameter]
-    private Task<AuthenticationState>? AuthState { get; set; }
+    private int UserCount;
+    private int CharacterCount;
+    private int PublicCharacterCount;
+    private int ClassCount;
+    private int TraitCount;
+    private int SpellCount;
+
+    private string? CurrentUserId;
+
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthState;
-        var user = authState.User;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        CurrentUserId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            loggedIn = true;
-
-            IsSpectator = user.IsInRole("Spectator");
-
-            if (IsSpectator)
-            {
-                characters = CharactersRepository.GetPublicCharacters();
-
-                foreach (var character in characters)
-                {
-                    if (!string.IsNullOrEmpty(character.UserId) &&
-                        !UserNames.ContainsKey(character.UserId))
-                    {
-                        var owner =
-                            await UserManager.FindByIdAsync(
-                                character.UserId);
-
-                        UserNames[character.UserId] =
-                            owner?.UserName ?? "Unknown";
-                    }
-                }
-            }
-            else
-            {
-                var userId =
-                    user.FindFirst(
-                        System.Security.Claims.ClaimTypes.NameIdentifier)
-                    ?.Value;
-
-                if (userId != null)
-                {
-                    characters = CharactersRepository.GetCharactersByUserId(userId);
-                }
-
-                allCharacters = CharactersRepository.GetCharacters();
-                foreach (var character in allCharacters)
-                {
-                    if (!string.IsNullOrEmpty(character.UserId) &&
-                        !UserNames.ContainsKey(character.UserId))
-                    {
-                        var owner =
-                            await UserManager.FindByIdAsync(
-                                character.UserId);
-
-                        UserNames[character.UserId] =
-                            owner?.UserName ?? "Unknown";
-                    }
-                }
-            }
-        }
+        UserCount = UsersRepository.GetUsers().Count;
+        CharacterCount = CharactersRepository.GetCharacters().Count;
+        PublicCharacterCount = CharactersRepository.GetPublicCharacters().Count;
+        ClassCount = ClassesRepository.GetClasses().Count;
+        TraitCount = TraitsRepository.GetTraits().Count;
+        SpellCount = SpellsRepository.GetSpells().Count;
     }
-
 }
