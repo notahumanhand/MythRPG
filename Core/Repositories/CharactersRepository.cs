@@ -71,13 +71,16 @@ namespace MythRPG.Core.Repositories
             var db = contextFactory;
             return db.Characters.ToList();
         }
-        public List<Character> GetCharactersByClass(string charclass)
+        public List<Character> GetCharactersByClassId(int classId)
         {
-            List<Character> characters = GetCharacters();
+            var db = contextFactory;
 
-            return characters
+            return db.Characters
+                .Include(c => c.CharacterClass)
+                .Include(c => c.Traits)
+                .Include(c => c.Spells)
                 .Where(c =>
-                    c.CharacterClass.Name == charclass)
+                    c.CharacterClass.CharacterClassId == classId)
                 .ToList();
         }
         public void UpdateCharacter(int id, Character character)

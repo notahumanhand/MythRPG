@@ -9,7 +9,7 @@
         List<Character> ListCharacters();
         Character? GetCharacterById(int id);
         List<Character> GetCharactersByUserId(string userId);
-        List<Character> GetCharactersByClass(string charclass);
+        List<Character> GetCharactersByClassId(int classId);
         List<Character> SearchCharacters(string name);
         void UpdateCharacter(int id, Character character);
         void RemoveTrait(int CharId, int TraitId);

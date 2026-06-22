@@ -67,7 +67,7 @@
     protected override void OnParametersSet()
     {
         characterClass = ClassesRepository.GetClassById(ClassId);
-        charactersUsingClass = CharactersRepository.GetCharactersByClass(characterClass.Name);
+        charactersUsingClass = CharactersRepository.GetCharactersByClassId(ClassId);
     }
 
     void Delete()
