@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "Admin")]
+@inject NavigationManager NavigationManager
 @inject ITraitsRepository TraitsRepository
 @inject IClassesRepository ClassesRepository
 
@@ -86,7 +87,14 @@
 
     protected override void OnParametersSet()
     {
-        trait = TraitsRepository.GetTraitById(TraitId);
+        Trait? trytrait = TraitsRepository.GetTraitById(TraitId);
+
+        if (trytrait is null)
+        {
+            NavigationManager.NavigateTo("/traits");
+            return;
+        } 
+        trait = trytrait;
 
         classes = ClassesRepository.GetClasses();
 

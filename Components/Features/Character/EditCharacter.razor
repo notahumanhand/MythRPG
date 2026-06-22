@@ -57,9 +57,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="class">Class</label>
-                <InputSelect id="class"
-                             @bind-Value="selectedClassId"
-                             class="form-control">
+                <InputSelect id="class" @bind-Value="selectedClassId" class="form-control">
                     @foreach (var characterClass in classes)
                     {
                         <option value="@characterClass.CharacterClassId">
@@ -163,16 +161,12 @@
         </div>
         <div class="col-md-6">
             <h3>Spells</h3>
-            @if (character.CharacterClass is not null)
+            <b>Your Colours</b>
+            @foreach (var colour in character.CharacterClass.SpellColours)
             {
-                <b>Your Colours</b>
-
-                @foreach (var colour in character.CharacterClass.SpellColours)
-                {
-                    <span class="badge bg-secondary m-1">
-                        @colour.Name
-                    </span>
-                }
+                <span class="badge bg-secondary m-1">
+                    @colour.Name
+                </span>
             }
             <ListSpellsComponent spells="@character.Spells" charId="@character.CharacterId" mode="TraitsSpellsDisplayMode.CharacterEdit"></ListSpellsComponent>
             <h4>Add Spell</h4>
@@ -244,16 +238,6 @@
             return;
         }
 
-        List<Trait> charactertraits = new();
-
-        foreach (var trait in character.Traits)
-        {
-            Trait fullTrait = TraitsRepository.GetTraitById(trait.TraitId);
-
-            charactertraits.Add(fullTrait);
-        }
-
-        character.Traits = charactertraits;
         classes = ClassesRepository.GetClasses();
         selectedClassId = character.CharacterClass.CharacterClassId;
 
@@ -294,8 +278,8 @@
         }
         if (!String.IsNullOrWhiteSpace(traitselected))
         {
-            Trait traitToAdd = TraitsRepository.GetTraitByName(traitselected);
-            if (traitToAdd is not null) TraitsRepository.AddTraitToCharacter(character.CharacterId, traitToAdd);
+            Trait? traitToAdd = TraitsRepository.GetTraitByName(traitselected);
+            if (traitToAdd is not null && character is not null) TraitsRepository.AddTraitToCharacter(character.CharacterId, traitToAdd);
             traitselected = "";
             confirmTraitText = true;
             character = CharactersRepository.GetCharacterById(CharId);
@@ -312,7 +296,7 @@
         if (!String.IsNullOrWhiteSpace(spellselected))
         {
             Spell? spellToAdd = SpellsRepository.GetSpellByName(spellselected);
-            if (spellToAdd is not null) SpellsRepository.AddSpellToCharacter(character.CharacterId, spellToAdd);
+            if (character is not null && spellToAdd is not null) SpellsRepository.AddSpellToCharacter(character.CharacterId, spellToAdd);
             spellselected = "";
             confirmSpellText = true;
             character = CharactersRepository.GetCharacterById(CharId);

@@ -252,17 +252,6 @@
         }
         CanEdit = isOwner || isAdmin;
 
-        List<Trait> charactertraits = new();
-
-        foreach (var trait in character.Traits)
-        {
-            Trait fullTrait = TraitsRepository.GetTraitById(trait.TraitId);
-
-            charactertraits.Add(fullTrait);
-        }
-
-        character.Traits = charactertraits;
-
         health = character.CalculateHealth();
         prowess = character.CalculateProwess();
         arcana = character.CalculateArcana();

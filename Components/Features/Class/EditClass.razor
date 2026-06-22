@@ -5,6 +5,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+@inject NavigationManager NavigationManager
 @inject ISpellColoursRepository SpellColoursRepository
 @inject IClassesRepository ClassesRepository
 @inject ITraitsRepository TraitsRepository
@@ -205,14 +206,17 @@
 
     protected override void OnParametersSet()
     {
-        characterClass =
-            ClassesRepository.GetClassById(ClassId);
+        CharacterClass? tryClass = ClassesRepository.GetClassById(ClassId);
+        if (tryClass is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        characterClass = tryClass;
 
-        spellColours =
-            SpellColoursRepository.GetSpellColours();
+        spellColours = SpellColoursRepository.GetSpellColours();
 
-        selectedSpellColourId =
-            spellColours.FirstOrDefault()?.SpellColourId ?? 0;
+        selectedSpellColourId = spellColours.FirstOrDefault()?.SpellColourId ?? 0;
 
         RefreshAvailableTraits();
     }
@@ -242,42 +246,30 @@
 
     private void AddSpellColour()
     {
-        ClassesRepository.AddSpellColourToClass(
-            ClassId,
-            selectedSpellColourId);
+        ClassesRepository.AddSpellColourToClass(ClassId, selectedSpellColourId);
 
-        characterClass =
-            ClassesRepository.GetClassById(ClassId);
+        characterClass = ClassesRepository.GetClassById(ClassId);
     }
 
-    private void RemoveSpellColour(
-        SpellColour colour)
+    private void RemoveSpellColour(SpellColour colour)
     {
-        ClassesRepository.RemoveSpellColourFromClass(
-            ClassId,
-            colour.SpellColourId);
+        ClassesRepository.RemoveSpellColourFromClass(ClassId, colour.SpellColourId);
 
-        characterClass =
-            ClassesRepository.GetClassById(ClassId);
+        characterClass = ClassesRepository.GetClassById(ClassId);
     }
 
     private void AddTrait()
     {
-        Trait? trait =
-            TraitsRepository.GetTraitByName(
-                selectedTraitName);
+        Trait? trait = TraitsRepository.GetTraitByName(selectedTraitName);
 
         if (trait is null)
         {
             return;
         }
 
-        ClassesRepository.AddTraitToClass(
-            ClassId,
-            trait.TraitId);
+        ClassesRepository.AddTraitToClass(ClassId, trait.TraitId);
 
-        characterClass =
-            ClassesRepository.GetClassById(ClassId);
+        characterClass = ClassesRepository.GetClassById(ClassId);
 
         RefreshAvailableTraits();
     }

@@ -70,7 +70,7 @@ namespace MythRPG.Core
         public int CalculateArcana()
         {
             int arcana = HalfLevel() * this.Charisma;
-            if (this.CharacterClass is not null && this.CharacterClass.Name.Equals("Mage")) arcana += this.Knowledge;
+            if (this.CharacterClass.Name.Equals("Mage")) arcana += this.Knowledge;
             int bonuses = 0;
             foreach (var trait in  this.Traits)
             {

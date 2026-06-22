@@ -4,6 +4,7 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+@inject NavigationManager NavigationManager
 @inject ISpellsRepository SpellsRepository
 @inject ISpellColoursRepository SpellColoursRepository
 
@@ -185,11 +186,15 @@
 
     protected override void OnParametersSet()
     {
-        spellColours =
-            SpellColoursRepository.GetSpellColours();
+        spellColours = SpellColoursRepository.GetSpellColours();
+        Spell? tryspell = SpellsRepository.GetSpellById(SpellId);
 
-        spell =
-            SpellsRepository.GetSpellById(SpellId);
+        if (tryspell is null)
+        {
+            NavigationManager.NavigateTo("/spells");
+            return;
+        }
+        spell = tryspell;
     }
 
     void Update()

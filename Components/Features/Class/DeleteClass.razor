@@ -67,6 +67,11 @@
     protected override void OnParametersSet()
     {
         characterClass = ClassesRepository.GetClassById(ClassId);
+        if (characterClass is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
         charactersUsingClass = CharactersRepository.GetCharactersByClassId(ClassId);
     }
 
