@@ -16,8 +16,9 @@
             <tr>
                 <th scope="col" class="bg-transparent">Id</th>
                 <th scope="col" class="bg-transparent">Username</th>
+                <th scope="col" class="bg-transparent">Roles</th>
                 <th scope="col" class="bg-transparent">Characters</th>
-                    <th scope="col" class="bg-transparent">Collection</th>
+                <th scope="col" class="bg-transparent">Collection</th>
                 <th scope="col" class="bg-transparent"></th>
                 <th scope="col" class="bg-transparent"></th>
             </tr>
@@ -29,13 +30,30 @@
                     <th scope="row" class="bg-transparent">@user.Id</th>
                     <td class="bg-transparent">@user.UserName</td>
                     <td class="bg-transparent">
+                            @if (userRoles.TryGetValue(user.Id, out var roles) && roles.Count > 0)
+                            {
+                                @foreach (var role in roles)
+                                {
+                                    <span class="badge bg-secondary me-1">
+                                        @role
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">None</span>
+                            }
+                    </td>
+                    <td class="bg-transparent">
                         @string.Join(", ", user.Characters.Select(c => c.CharacterName))
                     </td>
                     <td class="bg-transparent">
-                        @if (!spectatorIds.Contains(user.Id))
-                        {
-                            <a class="btn btn-secondary" href="/@user.Id/characters">View</a>
-                        }
+                            @if (!userRoles.GetValueOrDefault(user.Id, new List<string>()).Contains("Spectator"))
+                            {
+                                <a class="btn btn-secondary" href="/@user.Id/characters">
+                                    View
+                                </a>
+                            }
                     </td>
                     <td class="bg-transparent">
                         <a class="btn btn-primary" href="/manage/@user.Id">Edit</a>
@@ -57,17 +75,15 @@
     public List<User> users = new List<User>();
     private User newuser = new User { UserName = "" };
     private string text = "";
-    private HashSet<string> spectatorIds = new();
+    private Dictionary<string, IList<string>> userRoles = new();
     protected override async Task OnInitializedAsync()
     {
         users = UsersRepository.GetUsers();
 
         foreach (var user in users)
         {
-            if (await UserManager.IsInRoleAsync(user, "Spectator"))
-            {
-                spectatorIds.Add(user.Id);
-            }
+            var roles = await UserManager.GetRolesAsync(user);
+            userRoles[user.Id] = roles;
         }
     }
     private async Task DeleteUser(string id)
