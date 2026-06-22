@@ -154,7 +154,7 @@
             <h4>Add Trait</h4>
             <div class="border border-dark m-2 p-2 rounded">
                 <select id="class" @bind="traitselected" class="form-control">
-                    <ListTraitOptionsComponent></ListTraitOptionsComponent>
+                    <ListTraitOptionsComponent traitsOverride="@availableTraits" type="Class Trait"></ListTraitOptionsComponent>
                 </select>
                 <button type="button" class="btn btn-primary" @onclick="AddTrait">Add Trait</button>
             </div>
@@ -172,7 +172,7 @@
             <h4>Add Spell</h4>
             <div class="border border-dark m-2 p-2 rounded">
                 <select id="class" @bind="spellselected" class="form-control">
-                    <ListSpellOptionsComponent></ListSpellOptionsComponent>
+                    <ListSpellOptionsComponent AllowedColours="@character.CharacterClass.SpellColours"></ListSpellOptionsComponent>
                 </select>
                 <button type="button" class="btn btn-primary" @onclick="AddSpell">Add Spell</button>
             </div>
@@ -200,6 +200,8 @@
 
     private List<CharacterClass> classes = new();
     private int selectedClassId;
+
+    private List<Trait> availableTraits = new();
 
     private bool confirmText = false;
     private bool AuthorizedEditor = false;
@@ -240,6 +242,7 @@
 
         classes = ClassesRepository.GetClasses();
         selectedClassId = character.CharacterClass.CharacterClassId;
+        RefreshAvailableTraits();
 
         PageReady = true;
     }
@@ -259,6 +262,7 @@
         CharactersRepository.UpdateCharacter(CharId, character);
         confirmText = true;
         character = CharactersRepository.GetCharacterById(CharId);
+        RefreshAvailableTraits();
     }
     void ClearAlert()
     {
@@ -283,6 +287,7 @@
             traitselected = "";
             confirmTraitText = true;
             character = CharactersRepository.GetCharacterById(CharId);
+            RefreshAvailableTraits();
         }
     }
     private string spellselected = "";
@@ -301,6 +306,17 @@
             confirmSpellText = true;
             character = CharactersRepository.GetCharacterById(CharId);
         }
+    }
+    private void RefreshAvailableTraits()
+    {
+        if (character is null)
+        {
+            return;
+        }
+
+        availableTraits = TraitsRepository.GetAvailableTraitsForClass(character.CharacterClass.CharacterClassId)
+                .Where(t => !character.Traits.Any(ct => ct.TraitId == t.TraitId))
+                .ToList();
     }
 
 }

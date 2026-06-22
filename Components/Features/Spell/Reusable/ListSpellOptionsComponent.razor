@@ -17,8 +17,7 @@
 
     protected override void OnParametersSet()
     {
-        var allSpells =
-            SpellsRepository.GetSpells();
+        var allSpells = SpellsRepository.GetSpells();
 
         if (AllowedColours is null ||
             AllowedColours.Count == 0)

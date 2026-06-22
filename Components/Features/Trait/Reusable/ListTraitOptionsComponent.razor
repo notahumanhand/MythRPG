@@ -13,6 +13,9 @@
     [Parameter]
     public List<Trait>? traitsOverride { get; set; }
 
+    [Parameter]
+    public string? type { get; set; }
+
     protected override void OnParametersSet()
     {
         if (traitsOverride is not null)
@@ -22,6 +25,17 @@
         else
         {
             traits = TraitsRepository.GetTraits();
+        }
+
+        if (!string.IsNullOrWhiteSpace(type))
+        {
+            traits = traits
+                .Where(t =>
+                    !string.IsNullOrWhiteSpace(t.Source) &&
+                    t.Source.Contains(
+                        type,
+                        StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
     }
 }
