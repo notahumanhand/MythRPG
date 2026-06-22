@@ -19,7 +19,7 @@
         </CharacterListComponent>
     }
 
-    @if (DisplayMode == CharacterDisplayMode.User)
+    @if (isOwner)
     {
         <br />
         <br />
@@ -47,6 +47,8 @@
     private string PageTitle = "Characters";
 
     private bool PageReady;
+
+    public bool isOwner = false;
 
     private CharacterDisplayMode DisplayMode = CharacterDisplayMode.Collection;
 
@@ -86,7 +88,7 @@
             isAdmin = user.IsInRole("Admin");
         }
 
-        bool isOwner = CurrentUserId == UserId;
+        isOwner = CurrentUserId == UserId;
 
         var userCharacters = CharactersRepository.GetCharactersByUserId(UserId);
 
