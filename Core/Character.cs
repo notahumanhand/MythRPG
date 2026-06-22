@@ -7,15 +7,15 @@ namespace MythRPG.Core
     public class Character
     {
         public int CharacterId { get; set; }
-
-        public string? UserId { get; set; }
+        public required string UserId { get; set; }
         public bool IsPublic { get; set; }
-        public string CharacterName { get; set; } = string.Empty;
+
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Character name is required.")]
+        public required string CharacterName { get; set; }
 
         [Range(1, 20, ErrorMessage = "Level must be between 1 and 20.")]
         public int CharacterLevel { get; set; }
-        public string? LegacyClass { get; set; }
-        public CharacterClass? CharacterClass { get; set; }
+        public required CharacterClass CharacterClass { get; set; }
         public string? MythicPath { get; set; }
 
         [Range(0, 5, ErrorMessage = "Attributes must be between 0 and 5")]
@@ -70,7 +70,7 @@ namespace MythRPG.Core
         public int CalculateArcana()
         {
             int arcana = HalfLevel() * this.Charisma;
-            if (this.LegacyClass is not null && this.LegacyClass.Equals("Mage")) arcana += this.Knowledge;
+            if (this.CharacterClass is not null && this.CharacterClass.Name.Equals("Mage")) arcana += this.Knowledge;
             int bonuses = 0;
             foreach (var trait in  this.Traits)
             {

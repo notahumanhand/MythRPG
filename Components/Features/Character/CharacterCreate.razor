@@ -5,6 +5,7 @@
 @attribute [Authorize]
 @inject UserManager<User> UserManager
 @inject ICharactersRepository CharactersRepository;
+@inject IClassesRepository ClassesRepository;
 @inject NavigationManager NavigationManager;
 
 @page "/create-character"
@@ -23,6 +24,7 @@
             <div class="form-group">
                 <label for="name">Name</label>
                 <InputText id="name" @bind-Value="character.CharacterName" class="form-control"></InputText>
+                <ValidationMessage For="() => character.CharacterName"></ValidationMessage>
             </div>
         </div>
         <div class="col-md-2">
@@ -43,9 +45,14 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="class">Class</label>
-                    <InputSelect id="class" @bind-Value="character.LegacyClass" class="form-control">
-                    <ClassSelectOptionComponent></ClassSelectOptionComponent>
-                </InputSelect>
+                    <InputSelect @bind-Value="selectedClassId" class="form-control">
+                        @foreach (var characterClass in classes)
+                        {
+                            <option value="@characterClass.CharacterClassId">
+                                @characterClass.Name
+                            </option>
+                        }
+                    </InputSelect>
             </div>
         </div>
     </div>
@@ -64,7 +71,9 @@
 
 @code {
     [SupplyParameterFromForm]
-    private Character character { get; set; } = new Character();
+    private Character character { get; set; } =  default!;
+    private int selectedClassId;
+    private List<CharacterClass> classes = new();
     private bool error = false;
     private bool PageReady = false;
     [CascadingParameter]
@@ -86,6 +95,18 @@
             return;
         }
 
+        classes = ClassesRepository.GetClasses();
+        selectedClassId = classes.First().CharacterClassId;
+
+        character = new Character
+            {
+                UserId = string.Empty,
+                CharacterName = string.Empty,
+                CharacterClass = classes.First()
+            };
+
+        selectedClassId = classes.First().CharacterClassId;
+
         PageReady = true;
     }
     private async Task Create()
@@ -97,10 +118,17 @@
         {
             var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
+            var selectedClass = ClassesRepository.GetClassById(selectedClassId);
+            if (selectedClass is null)
+            {
+                error = true;
+                return;
+            }
+
             if (userId != null)
             {
                 character.UserId = userId;
-
+                character.CharacterClass = selectedClass;
                 character.Traits = new List<Trait>();
                 character.Spells = new List<Spell>();
 

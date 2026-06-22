@@ -6,24 +6,54 @@
 @attribute [Authorize(Roles = "Admin")]
 
 @inject IClassesRepository ClassesRepository
+@inject ICharactersRepository CharactersRepository
 @inject NavigationManager NavigationManager
 
 <PageTitle>Delete Class</PageTitle>
 
 @if (characterClass is not null)
 {
-    <h1>Are you sure you want to delete @characterClass.Name?</h1>
+    <h1>Delete @characterClass.Name</h1>
 
-    <button type="button"
-            class="btn btn-danger"
-            @onclick="Delete">
-        Yes, delete this class
-    </button>
+    @if (charactersUsingClass.Count > 0)
+    {
+        <div class="alert alert-warning">
+            This class cannot be deleted because it is currently
+            being used by one or more characters.
+        </div>
 
-    <a href="/classes"
-       class="btn btn-secondary">
-        Cancel
-    </a>
+        <h5>Characters using this class</h5>
+
+        <ul>
+            @foreach (var character in charactersUsingClass)
+            {
+                <li>@character.CharacterName</li>
+            }
+        </ul>
+
+        <a href="/classes"
+           class="btn btn-secondary">
+            Return
+        </a>
+    }
+    else
+    {
+        <h4>
+            Are you sure you want to delete
+            @characterClass.Name?
+        </h4>
+
+        <button type="button"
+                class="btn btn-danger"
+                @onclick="Delete">
+            Yes, delete this class
+        </button>
+
+        <a href="/classes"
+           class="btn btn-secondary">
+            Cancel
+        </a>
+    }
 }
 
 @code {
@@ -32,9 +62,12 @@
 
     private CharacterClass characterClass = new();
 
+    private List<Character> charactersUsingClass = new();
+
     protected override void OnParametersSet()
     {
         characterClass = ClassesRepository.GetClassById(ClassId);
+        charactersUsingClass = CharactersRepository.GetCharactersByClass(characterClass.Name);
     }
 
     void Delete()

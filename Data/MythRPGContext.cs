@@ -71,11 +71,12 @@ namespace MythRPG.Data
                 .HasIndex(t => t.Name)
                 .IsUnique();
 
+            modelBuilder.Entity<Character>().Navigation(c => c.CharacterClass).AutoInclude();
             modelBuilder.Entity<Character>().Navigation(e => e.Traits).AutoInclude();
             modelBuilder.Entity<Character>().Navigation(e => e.Spells).AutoInclude();
             modelBuilder.Entity<CharacterClass>().Navigation(c => c.GrantedTraits).AutoInclude();
             modelBuilder.Entity<CharacterClass>().Navigation(c => c.SpellColours).AutoInclude();
-            //modelBuilder.Entity<Trait>().Navigation(e => e.Bonuses).AutoInclude();
+            modelBuilder.Entity<Trait>().Navigation(e => e.Bonuses).AutoInclude();
         }
         
     }

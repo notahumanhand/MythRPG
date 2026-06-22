@@ -21,7 +21,7 @@ namespace MythRPG.Core.Repositories
         public List<Character> GetCharacters()
         {
             var db = contextFactory;
-            return db.Characters.Include(e => e.Traits).Include(c => c.Spells).ToList();
+            return db.Characters.Include(c => c.CharacterClass).Include(e => e.Traits).Include(c => c.Spells).ToList();
         }
         public List<Character> GetPublicCharacters()
         {
@@ -29,6 +29,7 @@ namespace MythRPG.Core.Repositories
 
             return db.Characters
                 .Where(c => c.IsPublic)
+                .Include(c => c.CharacterClass)
                 .Include(c => c.Traits)
                 .Include(c => c.Spells)
                 .ToList();
@@ -38,14 +39,14 @@ namespace MythRPG.Core.Repositories
             var db = contextFactory;
             return db.Characters.ToList();
         }
-        public Character GetCharacterById(int id)
+        public Character? GetCharacterById(int id)
         {
             List<Character> characters = GetCharacters();
             foreach (var character in characters)
             {
                 if (character.CharacterId == id) return character;
             }
-            return new Character();
+            return null;
         }
         public void DeleteCharacter(int id)
         {
@@ -60,6 +61,7 @@ namespace MythRPG.Core.Repositories
             var db = contextFactory;
             return db.Characters
                 .Where(c => c.UserId == userId)
+                .Include(c => c.CharacterClass)
                 .Include(c => c.Traits)
                 .Include(c => c.Spells)
                 .ToList();
@@ -71,14 +73,12 @@ namespace MythRPG.Core.Repositories
         }
         public List<Character> GetCharactersByClass(string charclass)
         {
-            var db = contextFactory;
             List<Character> characters = GetCharacters();
-            List<Character> classcharacters = new List<Character>();
-            foreach (var character in characters)
-            {
-                if (character.LegacyClass == charclass) classcharacters.Add(character);
-            }
-            return classcharacters;
+
+            return characters
+                .Where(c =>
+                    c.CharacterClass.Name == charclass)
+                .ToList();
         }
         public void UpdateCharacter(int id, Character character)
         {
@@ -89,7 +89,7 @@ namespace MythRPG.Core.Repositories
             if (characterToUpdate is not null)
             {
                 characterToUpdate.IsPublic = character.IsPublic;
-                characterToUpdate.LegacyClass = character.LegacyClass;
+                characterToUpdate.CharacterClass = character.CharacterClass;
                 characterToUpdate.CharacterLevel = character.CharacterLevel;
                 characterToUpdate.CharacterName = character.CharacterName;
                 characterToUpdate.MythicPath = character.MythicPath;

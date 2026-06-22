@@ -11,7 +11,11 @@
             <br />
         }
         <h3>@Character.CharacterName</h3>
-        <b>Level @Character.CharacterLevel @Character.Species @Character.LegacyClass</b>
+        <b>
+            Level @Character.CharacterLevel
+            @Character.Species
+            @Character.CharacterClass?.Name
+        </b>
         <br />
         <a class="btn btn-light" href="/character-sheet/@Character.CharacterId">View</a>
         @if (!IsSpectator)

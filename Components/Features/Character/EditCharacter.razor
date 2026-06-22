@@ -7,6 +7,7 @@
 @inject UserManager<User> UserManager
 @inject NavigationManager NavigationManager
 @inject ICharactersRepository CharactersRepository
+@inject IClassesRepository ClassesRepository
 @inject ITraitsRepository TraitsRepository
 @inject ISpellsRepository SpellsRepository
 
@@ -56,9 +57,16 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="class">Class</label>
-                <select id="class" @bind="character.LegacyClass" class="form-control">
-                    <ClassSelectOptionComponent></ClassSelectOptionComponent>
-                </select>
+                <InputSelect id="class"
+                             @bind-Value="selectedClassId"
+                             class="form-control">
+                    @foreach (var characterClass in classes)
+                    {
+                        <option value="@characterClass.CharacterClassId">
+                            @characterClass.Name
+                        </option>
+                    }
+                </InputSelect>
             </div>
         </div>
         <div class="col-md-6">
@@ -155,8 +163,17 @@
         </div>
         <div class="col-md-6">
             <h3>Spells</h3>
-            <p>Your Colours</p>
-            <ListSpellColoursComponent charclass="@character.LegacyClass"></ListSpellColoursComponent>
+            @if (character.CharacterClass is not null)
+            {
+                <b>Your Colours</b>
+
+                @foreach (var colour in character.CharacterClass.SpellColours)
+                {
+                    <span class="badge bg-secondary m-1">
+                        @colour.Name
+                    </span>
+                }
+            }
             <ListSpellsComponent spells="@character.Spells" charId="@character.CharacterId" mode="TraitsSpellsDisplayMode.CharacterEdit"></ListSpellsComponent>
             <h4>Add Spell</h4>
             <div class="border border-dark m-2 p-2 rounded">
@@ -184,8 +201,11 @@
     [Parameter]
     public int CharId { get; set; }
 
-    private Character character = new Character();
+    private Character? character;
     private List<Spell> spells = new();
+
+    private List<CharacterClass> classes = new();
+    private int selectedClassId;
 
     private bool confirmText = false;
     private bool AuthorizedEditor = false;
@@ -193,9 +213,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var authState =
-            await AuthenticationStateProvider
-                .GetAuthenticationStateAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         var currentUser =
             await UserManager.GetUserAsync(authState.User);
@@ -206,19 +224,19 @@
             return;
         }
 
-        character =
-            CharactersRepository.GetCharacterById(CharId);
+        character = CharactersRepository.GetCharacterById(CharId);
 
-        bool isAdmin =
-            await UserManager.IsInRoleAsync(
-                currentUser,
-                "Admin");
+        if (character is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
 
-        bool isOwner =
-            character.UserId == currentUser.Id;
+        bool isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
 
-        AuthorizedEditor =
-            isOwner || isAdmin;
+        bool isOwner = character.UserId == currentUser.Id;
+
+        AuthorizedEditor = isOwner || isAdmin;
 
         if (!AuthorizedEditor)
         {
@@ -238,6 +256,8 @@
         }
 
         character.Traits = charactertraits;
+        classes = ClassesRepository.GetClasses();
+        selectedClassId = character.CharacterClass.CharacterClassId;
 
         PageReady = true;
     }
@@ -247,6 +267,12 @@
         if (!AuthorizedEditor)
         {
             return;
+        }
+        var selectedClass = ClassesRepository.GetClassById(selectedClassId);
+
+        if (selectedClass is not null)
+        {
+            character.CharacterClass = selectedClass;
         }
         CharactersRepository.UpdateCharacter(CharId, character);
         confirmText = true;

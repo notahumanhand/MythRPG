@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
 @inject ICharactersRepository CharactersRepository;
+@inject IClassesRepository ClassesRepository
 @inject NavigationManager NavigationManager;
 
 <PageTitle>Mythmaven: Import Character</PageTitle>
@@ -33,9 +34,10 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label for="class">Class</label>
-                    <InputSelect id="class" @bind-Value="character.LegacyClass" class="form-control" readonly>
-                    <ClassSelectOptionComponent></ClassSelectOptionComponent>
-                </InputSelect>
+                    <div class="form-group">
+                        <label for="class">Class</label>
+                        <InputText id="class" Value="@(character.CharacterClass.Name)" class="form-control" readonly />
+                    </div>
             </div>
         </div>
     </div>
@@ -84,7 +86,7 @@
     [CascadingParameter]
     private Task<AuthenticationState> AuthState { get; set; }
     [SupplyParameterFromForm]
-    private Character character { get; set; } = new Character();
+    private Character character { get; set; } = default!;
     private bool error = false;
     private bool PageReady = false;
 
@@ -107,6 +109,15 @@
             return;
         }
 
+        var classes = ClassesRepository.GetClasses();
+
+        character = new Character
+            {
+                UserId = string.Empty,
+                CharacterName = string.Empty,
+                CharacterClass = classes.First()
+            };
+
         PageReady = true;
     }
 
@@ -125,6 +136,18 @@
 
                 character.Traits = new List<Trait>();
                 character.Spells = new List<Spell>();
+
+                if (string.IsNullOrWhiteSpace(character.CharacterName))
+                {
+                    error = true;
+                    return;
+                }
+
+                if (character.CharacterClass is null)
+                {
+                    error = true;
+                    return;
+                }
 
                 CharactersRepository.AddCharacter(character);
 
@@ -156,8 +179,21 @@
                         character.CharacterLevel = int.Parse(val);
                         break;
                     case "CharacterClass":
-                        character.LegacyClass = val;
-                        break;
+                        {
+                            CharacterClass? importedClass =
+                                ClassesRepository
+                                    .GetClasses()
+                                    .FirstOrDefault(c => c.Name == val);
+
+                            if (importedClass is null)
+                            {
+                                error = true;
+                                return;
+                            }
+
+                            character.CharacterClass = importedClass;
+                            break;
+                        }
                     case "MythicPath":
                         character.MythicPath = val;
                         break;

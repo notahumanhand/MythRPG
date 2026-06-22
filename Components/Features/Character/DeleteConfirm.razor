@@ -19,7 +19,7 @@
 @code {
     [Parameter]
     public int CharId { get; set; }
-    private Character character = new Character();
+    private Character? character;
     private bool AuthorizedEditor;
     private bool PageReady = false;
     protected override async Task OnParametersSetAsync()
@@ -35,6 +35,12 @@
         }
 
         character = CharactersRepository.GetCharacterById(CharId);
+
+        if (character is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
 
         bool isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
         bool isOwner = character.UserId == currentUser.Id;

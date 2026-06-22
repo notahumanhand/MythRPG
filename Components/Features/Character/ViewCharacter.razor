@@ -9,20 +9,23 @@
 @inject ITraitsRepository TraitsRepository
 @rendermode InteractiveServer
 
-<PageTitle>Mythmaven: @character.CharacterName's Character Sheet</PageTitle>
-
-<div class="row">
-    <div class="col-md-10">
-        <h3>@character.CharacterName's Character Sheet</h3>
-    </div>
-    <div class="col-md-2">
-        <ExportSheetComponent character="character"></ExportSheetComponent>
-    </div>
-</div>
+<PageTitle>
+    @(character is null
+        ? "Mythmaven: Character Sheet"
+        : $"Mythmaven: {character.CharacterName}'s Character Sheet")
+</PageTitle>
 
 
 @if (PageReady && this.character is not null)
 {
+    <div class="row">
+        <div class="col-md-10">
+            <h3>@character.CharacterName's Character Sheet</h3>
+        </div>
+        <div class="col-md-2">
+            <ExportSheetComponent character="character"></ExportSheetComponent>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
@@ -62,7 +65,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="class">Class</label>
-                <input type="text" id="class" @bind="character.LegacyClass" class="form-control" readonly />
+                <input type="text" id="class" @bind="character.CharacterClass.Name" class="form-control" readonly />
             </div>
         </div>
         <div class="col-md-6">
@@ -209,7 +212,7 @@
     private bool CanEdit;
     private bool PageReady = false;
 
-    private Character character = new Character();
+    private Character? character;
     private int health = 0;
     private int prowess = 0;
     private int arcana = 0;
@@ -233,6 +236,11 @@
         }
 
         character = CharactersRepository.GetCharacterById(CharId);
+        if (character is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
 
         bool isAdmin = await UserManager.IsInRoleAsync(currentUser, "Admin");
         bool isOwner = character.UserId == currentUser.Id;
