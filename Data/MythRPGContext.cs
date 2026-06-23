@@ -23,15 +23,15 @@ namespace MythRPG.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<SpellColour>().HasData(
-                new SpellColour { SpellColourId = 1, Name = "Black" },
-                new SpellColour { SpellColourId = 2, Name = "White" },
-                new SpellColour { SpellColourId = 3, Name = "Red" },
-                new SpellColour { SpellColourId = 4, Name = "Orange" },
-                new SpellColour { SpellColourId = 5, Name = "Gold" },
-                new SpellColour { SpellColourId = 6, Name = "Green" },
-                new SpellColour { SpellColourId = 7, Name = "Blue" },
-                new SpellColour { SpellColourId = 8, Name = "Purple" },
-                new SpellColour { SpellColourId = 9, Name = "Brown" }
+                new SpellColour { SpellColourId = 1, Name = "Black", HexCode = "#121214" },
+                new SpellColour { SpellColourId = 2, Name = "White", HexCode = "#FFFFFF" },
+                new SpellColour { SpellColourId = 3, Name = "Red", HexCode = "#7D1616" },
+                new SpellColour { SpellColourId = 4, Name = "Orange", HexCode = "#DF4200" },
+                new SpellColour { SpellColourId = 5, Name = "Gold", HexCode = "#E08500" },
+                new SpellColour { SpellColourId = 6, Name = "Green", HexCode = "#2F4931" },
+                new SpellColour { SpellColourId = 7, Name = "Blue", HexCode = "#3169D9" },
+                new SpellColour { SpellColourId = 8, Name = "Purple", HexCode = "#971EA4" },
+                new SpellColour { SpellColourId = 9, Name = "Brown", HexCode = "#4E3526" }
             );
 
             modelBuilder.Entity<Character>()
