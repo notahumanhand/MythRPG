@@ -9,7 +9,7 @@ main {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-image: linear-gradient( 180deg, #57776e 0%, #4d6a62 40%, #425a53 70%, #354843 100% ) !important;
 }
 
 .top-row {
@@ -94,3 +94,12 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+.footer {
+    border-top: 1px solid #ddd;
+    margin-top: 2rem;
+    padding: 1rem 0;
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+}

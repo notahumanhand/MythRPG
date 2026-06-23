@@ -47,12 +47,12 @@ namespace MythRPG.Core.Repositories
         public List<Trait> GetTraits()
         {
             var db = contextFactory;
-            return db.Traits.Include(t => t.Bonuses).Include(t => t.EligibleClasses).ToList();
+            return db.Traits.OrderBy(t => t.Name).Include(t => t.Bonuses).Include(t => t.EligibleClasses).ToList();
         }
         public List<Trait> ListTraits()
         {
             var db = contextFactory;
-            return db.Traits.ToList();
+            return db.Traits.OrderBy(t => t.Name).ToList();
         }
         public List<Bonus> GetBonuses()
         {
@@ -150,7 +150,7 @@ namespace MythRPG.Core.Repositories
         public List<Trait> GetAvailableTraitsForClass(int classId)
         {
             var db = contextFactory;
-            return db.Traits.Where(t => !t.EligibleClasses.Any() || t.EligibleClasses.Any(c => c.CharacterClassId == classId)).ToList();
+            return db.Traits.Where(t => !t.EligibleClasses.Any() || t.EligibleClasses.Any(c => c.CharacterClassId == classId)).OrderBy(t => t.Name).ToList();
         }
     }
 }

@@ -12,7 +12,7 @@ else if (traits is null || traits.Count == 0)
 }
 else 
 {
-    @foreach (var trait in traits)
+    @foreach (var trait in traits.OrderBy(t => t.Name))
     {
         <div class="border border-dark m-2 p-2 rounded">
             @if (mode == TraitsSpellsDisplayMode.CharacterEdit)

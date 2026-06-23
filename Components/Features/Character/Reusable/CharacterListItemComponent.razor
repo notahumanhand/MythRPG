@@ -1,14 +1,14 @@
 @if (this.Character is not null)
 {
     <div class="align-items-center border border-dark rounded p-5">
-        @if (ShowPortrait)
-        {
-            <img src="@(Character.PortraitUrl ?? PortraitsRef.Default)" width="100" />
-        }
         @if (ShowOwnerName && !string.IsNullOrEmpty(Character.UserId))
         {
             <a href="/@Character.UserId/characters">@UserNames.GetValueOrDefault(Character.UserId, "Unknown")</a>
             <br />
+        }
+        @if (ShowPortrait)
+        {
+            <img src="@(Character.PortraitUrl ?? PortraitsRef.Default)" width="100" />
         }
         <h3>@Character.CharacterName</h3>
         <b>
@@ -37,7 +37,17 @@
     public Dictionary<string, string> UserNames
     { get; set; } = new();
 
-    private bool CanEdit => Character is not null && (Mode == CharacterDisplayMode.Admin || ( !string.IsNullOrEmpty(CurrentUserId) && Character.UserId == CurrentUserId));
+    private bool CanEdit =>
+    Character is not null &&
+    (
+        Mode == CharacterDisplayMode.Admin ||
+        Mode == CharacterDisplayMode.User ||
+        (
+            Mode == CharacterDisplayMode.Display &&
+            !string.IsNullOrEmpty(CurrentUserId) &&
+            Character.UserId == CurrentUserId
+        )
+    );
 
     private bool ShowPortrait =>
     Mode switch

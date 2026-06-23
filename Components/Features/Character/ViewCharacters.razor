@@ -12,7 +12,7 @@
 
 @if (characters is not null)
 {
-    <CharacterListComponent characters="characters" Mode="DisplayMode" CurrentUserId="CurrentUserId" UserNames="UserNames"></CharacterListComponent>
+    <CharacterListComponent characters="@characters" Mode="@DisplayMode" CurrentUserId="@CurrentUserId" UserNames="@UserNames"></CharacterListComponent>
 }
 
 @code {

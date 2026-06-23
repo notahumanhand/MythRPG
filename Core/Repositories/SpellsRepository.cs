@@ -38,9 +38,7 @@ namespace MythRPG.Core.Repositories
         {
             var db = contextFactory;
 
-            return db.Spells
-                .Include(s => s.Colour)
-                .ToList();
+            return db.Spells.OrderBy(s => s.Name).Include(s => s.Colour).ToList();
         }
         public Spell? GetSpellById(int id)
         {

@@ -16,65 +16,25 @@
         <div class="nav-item px-3">
             <AuthorizeView>
                 <Authorized>
-                    <p class="text-light">
-                        Logged In: @context.User.Identity?.Name
-                    </p>
-                </Authorized>
-                <NotAuthorized>
-                    <p class="text-light">Logged Out</p>
-                </NotAuthorized>
-            </AuthorizeView>
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-            <AuthorizeView>
-                <Authorized>
-                    @if (!context.User.IsInRole("Spectator"))
-                    {
-                        <NavLink class="nav-link" href="@($"/{CurrentUserId}/characters")">
-                            <span class="bi bi-list-nested-nav-menu"></span> My Characters
-                        </NavLink>
-                    }
-                </Authorized>
-            </AuthorizeView>
-            <NavLink class="nav-link" href="/characters">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> All Characters
-            </NavLink>
-            <NavLink class="nav-link" href="/classes">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Classes
-            </NavLink>
-            <NavLink class="nav-link" href="/mythics">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Mythic Paths
-            </NavLink>
-            <NavLink class="nav-link" href="/traits">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Traits
-            </NavLink>
-            <NavLink class="nav-link" href="/spells">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Spells
-            </NavLink>
-            <AuthorizeView>
-                <Authorized>
-                    @if (!context.User.IsInRole("Spectator"))
-                    {
-                        <NavLink class="nav-link" href="/profile">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> My Profile
-                        </NavLink>
-                    }
-                </Authorized>
-            </AuthorizeView>
-            <AuthorizeView>
-                <Authorized>
                     <div class="mt-auto px-3 pb-3">
-                        <form method="post" action="/logout" data-enhance="false">
+                        <form method="post" action="/logout" data-enhance="false" class="auth-row">
                             @if (context.User.IsInRole("Spectator"))
                             {
-                                <button type="submit" class="btn btn-sm btn-outline-light w-100">
+                                <span class="text-light">
+                                    Logged Out
+                                </span>
+
+                                <button type="submit" class="btn btn-sm btn-outline-light">
                                     Log In
                                 </button>
                             }
                             else
                             {
-                                <button type="submit" class="btn btn-sm btn-outline-light w-100">
+                                <span class="text-light">
+                                    Logged In: @context.User.Identity?.Name
+                                </span>
+
+                                <button type="submit" class="btn btn-sm btn-outline-light">
                                     Log Out
                                 </button>
                             }
@@ -83,11 +43,62 @@
                 </Authorized>
                 <NotAuthorized>
                     <div class="mt-auto px-3 pb-3">
+                        <p class="text-light">Logged Out</p>
                         <a href="/login" class="btn btn-sm btn-outline-light w-100">
                             Log In
                         </a>
                     </div>
                 </NotAuthorized>
+            </AuthorizeView>
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <i class="fa-solid fa-house"></i>&nbsp; Home
+            </NavLink>
+            <AuthorizeView>
+                <Authorized>
+                    @if (!context.User.IsInRole("Spectator"))
+                    {
+                        <NavLink class="nav-link" href="@($"/campaigns")">
+                            <i class="fa-solid fa-book"></i>&nbsp; My Campagns
+                        </NavLink>
+                        <NavLink class="nav-link" href="@($"/{CurrentUserId}/characters")">
+                            <i class="fa-solid fa-user"></i>&nbsp; My Characters
+                        </NavLink>
+                    }
+                </Authorized>
+            </AuthorizeView>
+            <NavLink class="nav-link" href="/characters">
+                <i class="fa-solid fa-people-group"></i>&nbsp; All Characters
+            </NavLink>
+            <NavLink class="nav-link" href="/classes">
+                <i class="fa-solid fa-dice"></i>&nbsp; Classes
+            </NavLink>
+            <NavLink class="nav-link" href="/mythics">
+                <i class="fa-solid fa-dragon"></i>&nbsp; Mythic Paths
+            </NavLink>
+            <NavLink class="nav-link" href="/species">
+                <i class="fa-solid fa-hand-sparkles"></i>&nbsp; Species
+            </NavLink>
+            <NavLink class="nav-link" href="/traits">
+                <i class="fa-solid fa-chart-bar"></i>&nbsp; Traits
+            </NavLink>
+            <NavLink class="nav-link" href="/spells">
+                <i class="fa-solid fa-explosion"></i>&nbsp; Spells
+            </NavLink>
+            <NavLink class="nav-link" href="/languages">
+                <i class="fa-solid fa-message"></i>&nbsp; Languages
+            </NavLink>
+            <NavLink class="nav-link" href="/items">
+                <i class="fa-solid fa-hands-holding-circle"></i>&nbsp; Items
+            </NavLink>
+            <AuthorizeView>
+                <Authorized>
+                    @if (!context.User.IsInRole("Spectator"))
+                    {
+                        <NavLink class="nav-link" href="/profile">
+                            <i class="fa-solid fa-image-portrait"></i>&nbsp; My Profile
+                        </NavLink>
+                    }
+                </Authorized>
             </AuthorizeView>
         </div>
     </nav>

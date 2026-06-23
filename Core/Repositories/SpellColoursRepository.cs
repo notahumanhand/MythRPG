@@ -17,7 +17,7 @@ namespace MythRPG.Core.Repositories
         {
             var db = contextFactory;
 
-            return db.SpellColours.ToList();
+            return db.SpellColours.OrderBy(c => c.SpellColourId).ToList();
         }
 
         public SpellColour? GetSpellColourById(int id)

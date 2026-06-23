@@ -26,17 +26,14 @@ namespace MythRPG.Core.Repositories
         {
             var db = contextFactory;
 
-            return db.CharacterClasses
-                .Include(c => c.GrantedTraits)
-                .Include(c => c.SpellColours)
-                .ToList();
+            return db.CharacterClasses.OrderBy(c => c.Name).Include(c => c.GrantedTraits).Include(c => c.SpellColours).ToList();
         }
 
         public List<CharacterClass> ListClasses()
         {
             var db = contextFactory;
 
-            return db.CharacterClasses.ToList();
+            return db.CharacterClasses.OrderBy(c => c.Name).ToList();
         }
 
         public CharacterClass? GetClassById(int id)

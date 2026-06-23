@@ -11,11 +11,9 @@ else if (spells is null || spells.Count == 0)
 }
 else
 {
-    @foreach (var spell in spells)
+    @foreach (var spell in spells.OrderBy(s => s.Name))
     {
-        bool insufficientArcana =
-            mode == TraitsSpellsDisplayMode.CharacterSheet &&
-            currentArcana < spell.Cost;
+        bool insufficientArcana = mode == TraitsSpellsDisplayMode.CharacterSheet && currentArcana < spell.Cost;
 
         <div class="border border-dark m-2 p-2 rounded @(insufficientArcana ? "bg-light" : "")"
              style="border-left: 8px solid @GetSpellColor(spell.Colour?.Name) !important;">

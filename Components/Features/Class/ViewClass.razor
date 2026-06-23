@@ -64,26 +64,16 @@
 
     private string SpellProgressionText()
     {
-        string startingSpellText =
-            characterClass.StartingSpells == 1
-                ? "spell"
-                : "spells";
+        string startingSpellText = characterClass.StartingSpells == 1 ? "spell" : "spells";
 
-        string perLevelSpellText =
-            characterClass.SpellsPerLevel == 1
-                ? "spell"
-                : "spells";
+        string perLevelSpellText = characterClass.SpellsPerLevel == 1 ? "spell" : "spells";
 
-        return
-            $"Starts with {characterClass.StartingSpells} {startingSpellText} and gains {characterClass.SpellsPerLevel} {perLevelSpellText} per level.";
+        return $"Starts with {characterClass.StartingSpells} {startingSpellText} and gains {characterClass.SpellsPerLevel} {perLevelSpellText} per level.";
     }
 
     private string SpellListsText()
     {
-        var colours =
-            characterClass.SpellColours
-                .Select(c => c.Name)
-                .ToList();
+        var colours = characterClass.SpellColours.OrderBy(c => c.SpellColourId).Select(c => c.Name).ToList();
 
         if (colours.Count == 0)
         {
@@ -100,7 +90,6 @@
             return $"{colours[0]} and {colours[1]}";
         }
 
-        return
-            $"{string.Join(", ", colours.Take(colours.Count - 1))}, and {colours.Last()}";
+        return $"{string.Join(", ", colours.Take(colours.Count - 1))}, and {colours.Last()}";
     }
 }

@@ -21,23 +21,18 @@ namespace MythRPG.Core.Repositories
         public List<Character> GetCharacters()
         {
             var db = contextFactory;
-            return db.Characters.Include(c => c.CharacterClass).Include(e => e.Traits).Include(c => c.Spells).ToList();
+            return db.Characters.OrderBy(c => c.CharacterName).Include(c => c.CharacterClass).Include(e => e.Traits).Include(c => c.Spells).ToList();
         }
         public List<Character> GetPublicCharacters()
         {
             var db = contextFactory;
 
-            return db.Characters
-                .Where(c => c.IsPublic)
-                .Include(c => c.CharacterClass)
-                .Include(c => c.Traits)
-                .Include(c => c.Spells)
-                .ToList();
+            return db.Characters.OrderBy(c => c.CharacterName).Where(c => c.IsPublic).Include(c => c.CharacterClass).Include(c => c.Traits).Include(c => c.Spells).ToList();
         }
         public List<Character> ListCharacters()
         {
             var db = contextFactory;
-            return db.Characters.ToList();
+            return db.Characters.OrderBy(c => c.CharacterName).ToList();
         }
         public Character? GetCharacterById(int id)
         {
@@ -59,12 +54,7 @@ namespace MythRPG.Core.Repositories
         public List<Character> GetCharactersByUserId(string userId)
         {
             var db = contextFactory;
-            return db.Characters
-                .Where(c => c.UserId == userId)
-                .Include(c => c.CharacterClass)
-                .Include(c => c.Traits)
-                .Include(c => c.Spells)
-                .ToList();
+            return db.Characters.OrderBy(c => c.CharacterName).Where(c => c.UserId == userId).Include(c => c.CharacterClass).Include(c => c.Traits).Include(c => c.Spells).ToList();
         }
         public List<Character> SearchCharacters(string name)
         {
