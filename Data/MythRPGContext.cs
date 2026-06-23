@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using MythRPG.Core;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace MythRPG.Data
@@ -15,6 +16,7 @@ namespace MythRPG.Data
         public DbSet<Character> Characters { get; set; }
         public DbSet<Trait> Traits { get; set; }
         public DbSet<Bonus> Bonuses { get; set; }
+        public DbSet<Prerequisite> Prerequisites { get; set; }
         public DbSet<Spell> Spells { get; set; }
         public DbSet<CharacterClass> CharacterClasses { get; set; }
         public DbSet<SpellColour> SpellColours { get; set; }
@@ -47,6 +49,11 @@ namespace MythRPG.Data
                 .HasMany(e => e.Bonuses)
                 .WithMany();
             modelBuilder.Entity<Trait>()
+                .HasMany(t => t.Prerequisites)
+                .WithOne()
+                .HasForeignKey(p => p.TraitId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Trait>()
                 .HasMany(t => t.EligibleClasses)
                 .WithMany()
                 .UsingEntity("TraitEligibleClasses");
@@ -71,12 +78,17 @@ namespace MythRPG.Data
                 .HasIndex(t => t.Name)
                 .IsUnique();
 
+            modelBuilder.Entity<Prerequisite>()
+                .Property(p => p.Type)
+                .HasConversion<string>();
+
             modelBuilder.Entity<Character>().Navigation(c => c.CharacterClass).AutoInclude();
             modelBuilder.Entity<Character>().Navigation(e => e.Traits).AutoInclude();
             modelBuilder.Entity<Character>().Navigation(e => e.Spells).AutoInclude();
             modelBuilder.Entity<CharacterClass>().Navigation(c => c.GrantedTraits).AutoInclude();
             modelBuilder.Entity<CharacterClass>().Navigation(c => c.SpellColours).AutoInclude();
             modelBuilder.Entity<Trait>().Navigation(e => e.Bonuses).AutoInclude();
+            modelBuilder.Entity<Trait>().Navigation(t => t.Prerequisites).AutoInclude();
         }
         
     }

@@ -22,18 +22,6 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="form-group">
-                <label for="action">Action Cost</label>
-                <input type="text" id="action" @bind="trait.ActionCost" class="form-control"></input>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                <label for="resource">Resource Cost</label>
-                <input type="text" id="resource" @bind="trait.ResourceCost" class="form-control"></input>
-            </div>
-        </div>
-        <div class="col-md-4">
         </div>
     </div>
     <div class="form-group mt-3">
@@ -76,7 +64,8 @@
 
     private Trait trait = new Trait
         {
-            Name = string.Empty
+            Name = string.Empty,
+            Rank = 0
         };
 
     private bool confirmText = false;

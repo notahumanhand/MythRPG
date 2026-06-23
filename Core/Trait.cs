@@ -6,10 +6,9 @@
         public required string Name { get; set; }
         public string? Source { get; set; }
         public string? Description { get; set; }
-        public string? ActionCost { get; set; }
-        public string? ResourceCost { get; set; }
-        public List<Bonus> Bonuses { get; set; } = new List<Bonus>();
+        public required int Rank { get; set; } = 0;
+        public List<Bonus> Bonuses { get; set; } = new();
         public List<CharacterClass> EligibleClasses { get; set; } = new();
-
+        public List<Prerequisite> Prerequisites { get; set; } = new();
     }
 }

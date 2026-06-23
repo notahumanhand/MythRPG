@@ -93,8 +93,6 @@ namespace MythRPG.Core.Repositories
                 traitToUpdate.Name = trait.Name;
                 traitToUpdate.Source = trait.Source;
                 traitToUpdate.Description = trait.Description;
-                traitToUpdate.ResourceCost = trait.ResourceCost;
-                traitToUpdate.ActionCost = trait.ActionCost;
 
                 db.SaveChanges();
             }
@@ -123,8 +121,6 @@ namespace MythRPG.Core.Repositories
             traitToUpdate.Name = trait.Name;
             traitToUpdate.Source = trait.Source;
             traitToUpdate.Description = trait.Description;
-            traitToUpdate.ResourceCost = trait.ResourceCost;
-            traitToUpdate.ActionCost = trait.ActionCost;
             traitToUpdate.EligibleClasses.Clear();
 
             if (eligibleClassIds is not null && eligibleClassIds.Count > 0)
