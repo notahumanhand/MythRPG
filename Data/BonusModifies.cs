@@ -1,0 +1,34 @@
+﻿namespace MythRPG.Data
+{
+    public enum BonusModifies
+    {
+        Health,
+        Prowess,
+        Arcana,
+        Physical_Defence,
+        Magical_Defence,
+        Physical_Attack,
+        Magical_Attack,
+        Speed,
+        Fortitude,
+        Reflex,
+        Focus,
+        Will,
+        Athletics,
+        Acrobatics,
+        Stealth,
+        Sleight_of_Hand,
+        History,
+        Magic,
+        Medicine,
+        Nature,
+        Religion,
+        World,
+        Deception,
+        Insight,
+        Intimidation,
+        Perception,
+        Performance,
+        Persuasion
+    }
+}

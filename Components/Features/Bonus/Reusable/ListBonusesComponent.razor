@@ -2,14 +2,14 @@
 {
     @foreach (var bonus in bonuses)
     {
-        <p>@bonus.BonusId: +@bonus.Amount @bonus.Type bonus to @bonus.Modifies</p>
+        <p>@bonus.BonusId: @bonus.ToString()</p>
     }
 }
 else
 {
     @foreach (var bonus in bonuses)
     {
-        <p>+@bonus.Amount @bonus.Type bonus to @bonus.Modifies</p>
+        <p>@bonus.ToString()</p>
     }
 }
 

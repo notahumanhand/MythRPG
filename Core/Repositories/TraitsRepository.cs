@@ -194,7 +194,11 @@ namespace MythRPG.Core.Repositories
 
             var db = contextFactory;
 
-            var traitToUpdate = db.Traits.Include(t => t.Bonuses).Include(t => t.Prerequisites).Include(t => t.EligibleClasses).FirstOrDefault(t => t.TraitId == id);
+            var traitToUpdate = db.Traits
+                .Include(t => t.Bonuses)
+                .Include(t => t.Prerequisites)
+                .Include(t => t.EligibleClasses)
+                .FirstOrDefault(t => t.TraitId == id);
 
             if (traitToUpdate is null)
             {
@@ -206,27 +210,36 @@ namespace MythRPG.Core.Repositories
             traitToUpdate.Rank = trait.Rank;
             traitToUpdate.Description = trait.Description;
 
-            var existingPrerequisites = db.Prerequisites.Where(p => p.TraitId == id).ToList();
+            // Copy prerequisite data BEFORE removing anything.
+            var prerequisitesToCopy = trait.Prerequisites
+                .Select(p => new Prerequisite
+                {
+                    Type = p.Type,
+                    Value = p.Value,
+                    GroupId = p.GroupId
+                })
+                .ToList();
+
+            var existingPrerequisites = db.Prerequisites
+                .Where(p => p.TraitId == id)
+                .ToList();
+
             db.Prerequisites.RemoveRange(existingPrerequisites);
 
             traitToUpdate.Prerequisites.Clear();
 
-            foreach (var prerequisite in trait.Prerequisites)
+            foreach (var prerequisite in prerequisitesToCopy)
             {
-                traitToUpdate.Prerequisites.Add(
-                    new Prerequisite
-                    {
-                        Type = prerequisite.Type,
-                        Value = prerequisite.Value,
-                        GroupId = prerequisite.GroupId
-                    });
+                traitToUpdate.Prerequisites.Add(prerequisite);
             }
 
             traitToUpdate.EligibleClasses.Clear();
 
             if (eligibleClassIds is not null && eligibleClassIds.Count > 0)
             {
-                var selectedClasses = db.CharacterClasses.Where(c => eligibleClassIds.Contains(c.CharacterClassId)).ToList();
+                var selectedClasses = db.CharacterClasses
+                    .Where(c => eligibleClassIds.Contains(c.CharacterClassId))
+                    .ToList();
 
                 foreach (var characterClass in selectedClasses)
                 {

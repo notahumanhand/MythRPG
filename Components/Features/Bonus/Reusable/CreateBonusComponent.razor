@@ -1,45 +1,96 @@
 ﻿@rendermode InteractiveServer
+@using MythRPG.Data
 @inject ITraitsRepository TraitsRepository
 
 <h3>Create Bonus</h3>
+
 <EditForm Model="bonus" FormName="formBonus" OnValidSubmit="Create">
     <div class="row">
+
         <div class="col-md-2">
             <div class="form-group">
                 <label for="amount">Amount</label>
-                <InputNumber id="amount" @bind-Value="bonus.Amount" class="form-control"></InputNumber>
+                <InputNumber id="amount"
+                             @bind-Value="bonus.Amount"
+                             class="form-control" />
             </div>
         </div>
-        <div class="col-md-4">
+
+        <div class="col-md-3">
             <div class="form-group">
                 <label for="type">Type</label>
-                <InputText id="Type" @bind-Value="bonus.Type" class="form-control"></InputText>
+                <InputSelect id="type"
+                             @bind-Value="selectedBonusType"
+                             class="form-control">
+                    @foreach (var type in Enum.GetValues<BonusType>())
+                    {
+                        <option value="@type">
+                            @FormatEnum(type.ToString())
+                        </option>
+                    }
+                </InputSelect>
             </div>
         </div>
-        <div class="col-md-4">
+
+        <div class="col-md-5">
             <div class="form-group">
-                <label for="mods">Modifies</label>
-                <InputText id="mods" @bind-Value="bonus.Modifies" class="form-control"></InputText>
+                <label for="modifies">Modifies</label>
+                <InputSelect id="modifies"
+                             @bind-Value="selectedBonusModifies"
+                             class="form-control">
+                    @foreach (var modifies in Enum.GetValues<BonusModifies>())
+                    {
+                        <option value="@modifies">
+                            @FormatEnum(modifies.ToString())
+                        </option>
+                    }
+                </InputSelect>
             </div>
         </div>
+
         <div class="col-md-2">
             <div class="form-group">
                 <br />
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="submit"
+                        class="btn btn-primary">
+                    Create
+                </button>
             </div>
         </div>
+
     </div>
 </EditForm>
 
 @code {
-    [SupplyParameterFromForm]
-    private Bonus bonus { get; set; } = new Bonus();
 
-    void Create()
+    [Parameter]
+    public EventCallback OnBonusCreated { get; set; }
+
+    [SupplyParameterFromForm]
+    private Bonus bonus { get; set; } = new();
+
+    private BonusType selectedBonusType = BonusType.Aptitude;
+
+    private BonusModifies selectedBonusModifies = BonusModifies.Health;
+
+    private async Task Create()
     {
-        if (bonus.Amount > 0 && !String.IsNullOrWhiteSpace(bonus.Type) && !String.IsNullOrWhiteSpace(bonus.Modifies))
+        bonus.Type = selectedBonusType.ToString().Replace('_', ' ');
+        bonus.Modifies = selectedBonusModifies.ToString().Replace('_', ' ');
+
+        if (bonus.Amount > 0)
         {
             TraitsRepository.AddBonus(bonus);
+
+            bonus = new Bonus();
+
+            await OnBonusCreated.InvokeAsync();
         }
     }
+
+    private static string FormatEnum(string value)
+    {
+        return value.Replace('_', ' ');
+    }
+
 }

@@ -1,7 +1,10 @@
-﻿public enum CharacterDisplayMode
+﻿namespace MythRPG.Data
 {
-    Display,
-    Admin,
-    Collection,
-    User
+    public enum CharacterDisplayMode
+    {
+        Display,
+        Admin,
+        Collection,
+        User
+    }
 }

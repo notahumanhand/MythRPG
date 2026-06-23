@@ -1,30 +1,66 @@
 ﻿@page "/trait/edit/{TraitId:int}"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
+
 @attribute [Authorize(Roles = "Admin")]
+
 @inject NavigationManager NavigationManager
 @inject ITraitsRepository TraitsRepository
 @inject IClassesRepository ClassesRepository
 
 <PageTitle>Mythmaven: Edit Trait</PageTitle>
 
-@if (trait is not null) 
+@if (trait is not null)
 {
     <div class="form-group">
         <label for="name">Trait Name</label>
-        <input type="text" id="name" @bind="trait.Name" class="form-control"></input>
+        <InputText id="name"
+                   @bind-Value="trait.Name"
+                   class="form-control" />
     </div>
-    <div class="row">
+
+    <div class="row mt-3">
+
         <div class="col-md-4">
-            <div class="form-group">
-                <label for="source">Source</label>
-                <input type="text" id="source" @bind="trait.Source" class="form-control"></input>
-            </div>
+            <label for="source">Source</label>
+            <InputText id="source"
+                       @bind-Value="trait.Source"
+                       class="form-control" />
         </div>
-        <div class="col-md-4">
+
+        <div class="col-md-8">
+            <label>Rank</label>
+
+            <InputRadioGroup @bind-Value="trait.Rank">
+
+                <div class="form-check">
+                    <InputRadio Value="1" class="form-check-input" />
+                    <label class="form-check-label">
+                        Rank 1 (Available at any level)
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <InputRadio Value="2" class="form-check-input" />
+                    <label class="form-check-label">
+                        Rank 2 (Level 7+)
+                    </label>
+                </div>
+
+                <div class="form-check">
+                    <InputRadio Value="3" class="form-check-input" />
+                    <label class="form-check-label">
+                        Rank 3 (Level 15+)
+                    </label>
+                </div>
+
+            </InputRadioGroup>
+
         </div>
+
     </div>
-    <div class="form-group mt-3">
+
+    <div class="form-group mt-4">
         <h5>Eligible Classes</h5>
 
         <p>
@@ -44,50 +80,265 @@
                 </label>
             </div>
         }
+    </div>
+
+    <div class="form-group mt-4">
+        <label>Description</label>
+        <InputTextArea @bind-Value="trait.Description"
+                       class="form-control"
+                       rows="8" />
+    </div>
+
+    <hr />
+
+    <div class="row">
+
+        <!-- BONUSES -->
+
+        <div class="col-md-6">
+
+            <h4>Bonuses</h4>
+
+            @foreach (var bonus in trait.Bonuses.OrderBy(b => b.ToString()))
+            {
+                <div class="border rounded p-2 mb-2">
+
+                    @bonus
+
+                    <button type="button"
+                            class="btn btn-sm btn-danger float-end"
+                            @onclick="() => RemoveBonus(bonus.BonusId)">
+                        Remove
+                    </button>
+
+                </div>
+            }
+
+            <div class="card mt-3">
+                <div class="card-body">
+
+                    <h5>Add Existing Bonus</h5>
+
+                    <InputSelect @bind-Value="selectedBonusId"
+                                 class="form-control">
+
+                        <option value="0">
+                            Select Bonus...
+                        </option>
+
+                        @foreach (var bonus in bonuses.OrderBy(b => b.ToString()))
+                        {
+                            <option value="@bonus.BonusId">
+                                @bonus.ToString()
+                            </option>
+                        }
+
+                    </InputSelect>
+
+                    <button type="button"
+                            class="btn btn-success mt-2"
+                            @onclick="AddSelectedBonus">
+                        Add Bonus
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <CreateBonusComponent OnBonusCreated="RefreshBonuses" />
+            </div>
+
+        </div>
+
+        <!-- PREREQUISITES -->
+
+        <div class="col-md-6">
+
+            <h4>Prerequisites</h4>
+
+            @foreach (var group in trait.Prerequisites
+           .GroupBy(p => p.GroupId)
+           .OrderBy(g => g.Key))
+            {
+                <div class="border rounded p-3 mb-3">
+
+                    @foreach (var prerequisite in group)
+                    {
+                        <div class="row mb-2">
+
+                            <div class="col-md-4">
+
+                                <InputSelect @bind-Value="prerequisite.Type"
+                                             class="form-control">
+
+                                    @foreach (var type in Enum.GetValues<PrerequisiteType>())
+                                    {
+                                        <option value="@type">
+                                            @type
+                                        </option>
+                                    }
+
+                                </InputSelect>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                @if (prerequisite.Type == PrerequisiteType.Level)
+                                {
+                                    <input type="number"
+                                           min="1"
+                                           max="20"
+                                           class="form-control"
+                                           value="@ParseLevel(prerequisite.Value)"
+                                           @onchange="@(e => prerequisite.Value = e.Value?.ToString() ?? "1")" />
+                                }
+                                else
+                                {
+                                    <InputText @bind-Value="prerequisite.Value"
+                                               disabled="@(prerequisite.Type == PrerequisiteType.MixedLineage)"
+                                               class="form-control" />
+                                }
+
+                            </div>
+
+                            <div class="col-md-2">
+
+                                <button type="button"
+                                        class="btn btn-danger"
+                                        @onclick="() => RemovePrerequisite(prerequisite)">
+                                    Remove
+                                </button>
+
+                            </div>
+
+                        </div>
+                    }
+
+                    <button type="button"
+                            class="btn btn-secondary me-2"
+                            @onclick="() => AddAlternate(group.Key)">
+                        Add Alternate Prerequisite
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-danger"
+                            @onclick="() => DeleteGroup(group.Key)">
+                        Delete
+                    </button>
+
+                </div>
+            }
+
+            <button type="button"
+                    class="btn btn-success"
+                    @onclick="AddPrerequisiteGroup">
+                Add Prerequisite
+            </button>
+
+        </div>
 
     </div>
-    <div class="form-group">
-        <label for="desc">Description</label>
-        <input type="textarea" id="desc" @bind="trait.Description" class="form-control"></input>
-    </div>
+
+    <hr />
+
+    @if (confirmText)
+    {
+        <div class="alert alert-success">
+            Changes saved!
+            <button type="button"
+                    class="btn btn-sm btn-danger float-end"
+                    @onclick="ClearAlert">
+                X
+            </button>
+        </div>
+    }
+
+    <button type="button"
+            class="btn btn-success"
+            @onclick="Update">
+        Save Changes
+    </button>
+
+    <a class="btn btn-primary"
+       href="/traits">
+        Return to Traits
+    </a>
 }
-@if (confirmText)
-{
-    <p>Changes saved! <button type="button" class="btn btn-danger" @onclick="ClearAlert">X</button></p>
-}
-<button type="button" class="btn btn-success" @onclick="Update">Save Changes</button>
-<a class="btn btn-primary" href="/traits">Return to Traits</a>
 
 @code {
+
     [Parameter]
     public int TraitId { get; set; }
 
-    private Trait trait = new Trait
+    private Trait trait = new()
         {
             Name = string.Empty,
-            Rank = 0
+            Rank = 1
         };
 
-    private bool confirmText = false;
+    private bool confirmText;
 
     private List<CharacterClass> classes = new();
 
     private List<int> selectedClassIds = new();
 
+    private List<Bonus> bonuses = new();
+
+    private int selectedBonusId;
+
     protected override void OnParametersSet()
     {
-        Trait? trytrait = TraitsRepository.GetTraitById(TraitId);
+        LoadData();
+    }
 
-        if (trytrait is null)
+    private void LoadData()
+    {
+        Trait? tryTrait = TraitsRepository.GetTraitById(TraitId);
+
+        if (tryTrait is null)
         {
             NavigationManager.NavigateTo("/traits");
             return;
-        } 
-        trait = trytrait;
+        }
+
+        trait = tryTrait;
 
         classes = ClassesRepository.GetClasses();
 
-        selectedClassIds = trait.EligibleClasses.Select(c => c.CharacterClassId).ToList();
+        bonuses = TraitsRepository.GetBonuses();
+
+        selectedClassIds = trait.EligibleClasses
+            .Select(c => c.CharacterClassId)
+            .ToList();
+    }
+
+    private void RefreshBonuses()
+    {
+        bonuses = TraitsRepository.GetBonuses();
+    }
+
+    private void AddSelectedBonus()
+    {
+        if (selectedBonusId <= 0)
+        {
+            return;
+        }
+
+        TraitsRepository.AddBonusToTrait(
+            TraitId,
+            selectedBonusId);
+
+        LoadData();
+    }
+
+    private void RemoveBonus(int bonusId)
+    {
+        TraitsRepository.RemoveBonus(
+            TraitId,
+            bonusId);
+
+        LoadData();
     }
 
     private bool IsClassSelected(int classId)
@@ -97,7 +348,9 @@
 
     private void ToggleClass(int classId, object? value)
     {
-        bool selected = bool.TryParse(value?.ToString(), out bool result) && result;
+        bool selected =
+            bool.TryParse(value?.ToString(), out bool result)
+            && result;
 
         if (selected)
         {
@@ -112,13 +365,60 @@
         }
     }
 
-    void Update()
+    private void AddPrerequisiteGroup()
     {
-        TraitsRepository.UpdateTrait(TraitId, trait, selectedClassIds);
+        int nextGroupId = trait.Prerequisites.Any()
+            ? trait.Prerequisites.Max(p => p.GroupId) + 1
+            : 1;
+
+        trait.Prerequisites.Add(
+            new Prerequisite
+                {
+                    GroupId = nextGroupId,
+                    Type = PrerequisiteType.Trait
+                });
+    }
+
+    private void AddAlternate(int groupId)
+    {
+        trait.Prerequisites.Add(
+            new Prerequisite
+                {
+                    GroupId = groupId,
+                    Type = PrerequisiteType.Trait
+                });
+    }
+
+    private void DeleteGroup(int groupId)
+    {
+        trait.Prerequisites.RemoveAll(
+            p => p.GroupId == groupId);
+    }
+
+    private void RemovePrerequisite(
+        Prerequisite prerequisite)
+    {
+        trait.Prerequisites.Remove(prerequisite);
+    }
+
+    private static int ParseLevel(string value)
+    {
+        return int.TryParse(value, out int level)
+            ? level
+            : 1;
+    }
+
+    private void Update()
+    {
+        TraitsRepository.UpdateTrait(
+            TraitId,
+            trait,
+            selectedClassIds);
+
         confirmText = true;
     }
 
-    void ClearAlert()
+    private void ClearAlert()
     {
         confirmText = false;
     }
