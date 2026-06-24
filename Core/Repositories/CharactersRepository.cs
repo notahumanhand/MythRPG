@@ -101,6 +101,20 @@ namespace MythRPG.Core.Repositories
                 db.SaveChanges();
             }
         }
+
+        public void UpdateNotes(int characterId, string? publicNotes, string? privateNotes)
+        {
+            var db = contextFactory;
+            Character? character = db.Characters.FirstOrDefault(c => c.CharacterId == characterId);
+
+            if (character is null)
+                return;
+
+            character.PublicNotes = publicNotes;
+            character.PrivateNotes = privateNotes;
+
+            db.SaveChanges();
+        }
         public void RemoveTrait(int CharId, int TraitId)
         {
             var db = contextFactory;

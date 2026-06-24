@@ -12,6 +12,7 @@
         List<Character> GetCharactersByClassId(int classId);
         List<Character> SearchCharacters(string name);
         void UpdateCharacter(int id, Character character);
+        void UpdateNotes(int characterId, string? publicNotes, string? privateNotes);
         void RemoveTrait(int CharId, int TraitId);
         void RemoveSpell(int CharId, int SpellId);
         void LevelUpCharacter(int id);

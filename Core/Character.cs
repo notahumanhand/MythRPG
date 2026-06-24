@@ -42,6 +42,8 @@ namespace MythRPG.Core
         public string? Armour { get; set; }
         public bool? Shield { get; set; }
         public string? PortraitUrl { get; set; }
+        public string? PublicNotes { get; set; }
+        public string? PrivateNotes { get; set; }
 
         private int HalfLevel()
         {
