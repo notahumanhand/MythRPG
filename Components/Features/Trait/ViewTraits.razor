@@ -1,125 +1,399 @@
 ﻿@page "/traits"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
+
 @inject ITraitsRepository TraitsRepository
 @inject IClassesRepository ClassesRepository
 
 <PageTitle>Mythmaven: Traits</PageTitle>
 
 <h3>Traits</h3>
+
 <AuthorizeView Roles="Admin" Context="adminContext">
     <Authorized>
-        <ListTraitsComponent traits="traits" bonuses="true" mode="TraitsSpellsDisplayMode.AdminView"></ListTraitsComponent>
-    <h4>Add Trait</h4>
-    <div class="border border-dark m-2 p-2 rounded">
-        <EditForm Model="trait" FormName="formTrait" OnValidSubmit="Create">
-            <div class="form-group">
-                <label for="name">Name</label>
-                <InputText id="name" @bind-Value="trait.Name" class="form-control"></InputText>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="source">Source</label>
-                        <InputText id="source" @bind-Value="trait.Source" class="form-control"></InputText>
-                    </div>
-                </div>
-            </div>
+
+        <ListTraitsComponent traits="traits"
+                             bonuses="true"
+                             mode="TraitsSpellsDisplayMode.AdminView">
+        </ListTraitsComponent>
+
+        <div class="mb-3">
+            <a href="/incompatibilities"
+               class="btn btn-warning">
+                Manage Incompatibilities
+            </a>
+        </div>
+
+        <h4>Add Trait</h4>
+
+        <div class="border border-dark m-2 p-2 rounded">
+
+            <EditForm Model="trait"
+                      FormName="formTrait"
+                      OnValidSubmit="Create">
+
                 <div class="form-group">
-                    <h5>Eligible Classes</h5>
-
-                    <p>
-                        Leave all classes unchecked to make this trait
-                        available to all classes.
-                    </p>
-
-                    @foreach (var characterClass in classes)
-                    {
-                        <div class="form-check">
-                            <input type="checkbox"
-                                   class="form-check-input"
-                                   checked="@selectedClassIds.Contains(characterClass.CharacterClassId)"
-                                   @onchange="@(e => ToggleClass(characterClass.CharacterClassId, e.Value))" />
-
-                            <label class="form-check-label">
-                                @characterClass.Name
-                            </label>
-                        </div>
-                    }
+                    <label for="name">Trait Name</label>
+                    <InputText id="name"
+                               @bind-Value="trait.Name"
+                               class="form-control" />
                 </div>
-            <div class="form-group">
-                <label for="description">Description</label>
-                <InputTextArea id="description" @bind-Value="trait.Description" class="form-control"></InputTextArea>
-            </div>
-            <br />
-            <br />
-            <div class="form-group">
-                <h5><label for="addbonus">Add Bonus</label></h5>
+
+                <div class="row mt-3">
+
+                    <div class="col-md-4">
+                        <label for="source">Source</label>
+                        <InputText id="source"
+                                   @bind-Value="trait.Source"
+                                   class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label>Rank</label>
+
+                        <InputRadioGroup @bind-Value="trait.Rank">
+
+                            <div class="form-check">
+                                <InputRadio Value="0"
+                                            class="form-check-input" />
+                                <label class="form-check-label">
+                                    No Rank (Non-Class Trait)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <InputRadio Value="1"
+                                            class="form-check-input" />
+                                <label class="form-check-label">
+                                    Rank 1 (Available at any level)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <InputRadio Value="2"
+                                            class="form-check-input" />
+                                <label class="form-check-label">
+                                    Rank 2 (Level 7+)
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <InputRadio Value="3"
+                                            class="form-check-input" />
+                                <label class="form-check-label">
+                                    Rank 3 (Level 15+)
+                                </label>
+                            </div>
+
+                        </InputRadioGroup>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <h5>Eligible Classes</h5>
+
+                        <p>
+                            Leave all classes unchecked to make this trait available to all classes.
+                        </p>
+
+                        @foreach (var characterClass in classes)
+                        {
+                            <div class="form-check">
+
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       checked="@IsClassSelected(characterClass.CharacterClassId)"
+                                       @onchange="@(e => ToggleClass(characterClass.CharacterClassId, e.Value))" />
+
+                                <label class="form-check-label">
+                                    @characterClass.Name
+                                </label>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+                <div class="form-group mt-4">
+
+                    <label>Description</label>
+
+                    <InputTextArea @bind-Value="trait.Description"
+                                   class="form-control"
+                                   rows="8" />
+
+                </div>
+
+                <hr />
+
                 <div class="row">
-                    <div class="col-md-11">
-                        <InputNumber id="addbonus" @bind-Value="addbonus" class="form-control"></InputNumber>
+
+                    <!-- BONUSES -->
+
+                    <div class="col-md-6">
+
+                        <h4>Bonuses</h4>
+
+                        @foreach (var bonus in trait.Bonuses.OrderBy(b => b.ToString()))
+                        {
+                            <div class="border rounded p-2 mb-2">
+
+                                @bonus
+
+                                <button type="button"
+                                        class="btn btn-sm btn-danger float-end"
+                                        @onclick="() => RemoveBonus(bonus.BonusId)">
+                                    Remove
+                                </button>
+
+                            </div>
+                        }
+
+                        <div class="card mt-3">
+
+                            <div class="card-body">
+
+                                <h5>Add Existing Bonus</h5>
+
+                                <InputSelect @bind-Value="selectedBonusId"
+                                             class="form-control">
+
+                                    <option value="0">
+                                        Select Bonus...
+                                    </option>
+
+                                    @foreach (var bonus in bonuses.OrderBy(b => b.ToString()))
+                                    {
+                                        <option value="@bonus.BonusId">
+                                            @bonus.ToString()
+                                        </option>
+                                    }
+
+                                </InputSelect>
+
+                                <button type="button"
+                                        class="btn btn-success mt-2"
+                                        @onclick="AddSelectedBonus">
+                                    Add Bonus
+                                </button>
+
+                            </div>
+
+                        </div>
+
                     </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-success" @onclick="AddBonus">Add</button>
+
+                    <!-- PREREQUISITES -->
+
+                    <div class="col-md-6">
+
+                        <h4>Prerequisites</h4>
+
+                        @foreach (var group in trait.Prerequisites
+                        .GroupBy(p => p.GroupId)
+                        .OrderBy(g => g.Key))
+                        {
+                            <div class="border rounded p-3 mb-3">
+
+                                @foreach (var prerequisite in group)
+                                {
+                                    <div class="row mb-2">
+
+                                        <div class="col-md-4">
+
+                                            <InputSelect @bind-Value="prerequisite.Type"
+                                                         class="form-control">
+
+                                                @foreach (var type in Enum.GetValues<PrerequisiteType>())
+                                                {
+                                                    <option value="@type">
+                                                        @type
+                                                    </option>
+                                                }
+
+                                            </InputSelect>
+
+                                        </div>
+
+                                        <div class="col-md-6">
+
+                                            @if (prerequisite.Type == PrerequisiteType.Level)
+                                            {
+                                                <input type="number"
+                                                       min="1"
+                                                       max="20"
+                                                       class="form-control"
+                                                       value="@ParseLevel(prerequisite.Value)"
+                                                       @onchange="@(e => prerequisite.Value = e.Value?.ToString() ?? "1")" />
+                                            }
+                                            else
+                                            {
+                                                <InputText @bind-Value="prerequisite.Value"
+                                                           disabled="@(prerequisite.Type == PrerequisiteType.MixedLineage)"
+                                                           class="form-control" />
+                                            }
+
+                                        </div>
+
+                                        <div class="col-md-2">
+
+                                            <button type="button"
+                                                    class="btn btn-danger"
+                                                    @onclick="() => RemovePrerequisite(prerequisite)">
+                                                Remove
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+                                }
+
+                                <button type="button"
+                                        class="btn btn-secondary me-2"
+                                        @onclick="() => AddAlternate(group.Key)">
+                                    Add Alternate Prerequisite
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-danger"
+                                        @onclick="() => DeleteGroup(group.Key)">
+                                    Delete
+                                </button>
+
+                            </div>
+                        }
+
+                        <button type="button"
+                                class="btn btn-success"
+                                @onclick="AddPrerequisiteGroup">
+                            Add Prerequisite
+                        </button>
+
                     </div>
+
                 </div>
-                <p style="font-weight: 700;">Selected: @addbonus.ToString()</p>
-                <h6>Available Bonuses</h6>
-                <ListBonusesComponent bonuses="bonuses" showId="true"></ListBonusesComponent>
-            </div>
-            <br />
-            <br />
-            <h4>@trait.Name</h4>
-            <div class="row">
-                <div class="col-md-4">
-                    <b>Source</b><br>
-                    @trait.Source
+
+                <hr />
+
+                <h4>@trait.Name</h4>
+
+                <div class="row">
+
+                    <div class="col-md-4">
+
+                        <b>Source</b><br />
+                        @trait.Source
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <b>Rank</b><br />
+
+                        @(trait.Rank switch
+                        {
+                            0 => "No Rank",
+                            1 => "Rank 1",
+                            2 => "Rank 2",
+                            3 => "Rank 3",
+                            _ => "Unknown"
+                        })
+
+                    </div>
+
+                    <div class="col-md-4">
+                        <h5 class="mt-3">Eligible Classes</h5>
+
+                        @if (selectedClassIds.Count == 0)
+                        {
+                            <p>All Classes</p>
+                        }
+                        else
+                        {
+                            <p>
+                                @string.Join(", ",
+                                         classes
+                                         .Where(c => selectedClassIds.Contains(c.CharacterClassId))
+                                         .Select(c => c.Name))
+                            </p>
+                        }
+                    </div>
+
                 </div>
-            </div>
-            <h5>Eligible Classes</h5>
-            @if (selectedClassIds.Count == 0)
-            {
-                <p>All Classes</p>
-            }
-            else
-            {
-                <p>@string.Join(", ", classes.Where(c => selectedClassIds.Contains(c.CharacterClassId)).Select(c => c.Name))</p>
-            }
-            <h5>Description</h5>
+
+                <h5>Description</h5>
+
                 <div>
                     @MarkdownHelper.ToMarkup(trait.Description)
                 </div>
-            <h5>Bonuses</h5>
-            <ListBonusesComponent bonuses="@trait.Bonuses" showId="false"></ListBonusesComponent>
-            <br />
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
-    </div>
-    <div class="border border-dark m-2 p-2 rounded">
-        <CreateBonusComponent></CreateBonusComponent>
-    </div>
+
+                <h5>Prerequisites</h5>
+
+                @if (trait.Prerequisites.Any())
+                {
+                    <pre>@trait.GetFormattedPrerequisites()</pre>
+                }
+                else
+                {
+                    <p>None</p>
+                }
+
+                <h5>Bonuses</h5>
+
+                <ListBonusesComponent bonuses="@trait.Bonuses"
+                                      showId="false">
+                </ListBonusesComponent>
+
+                <br />
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Create
+                </button>
+
+            </EditForm>
+
+        </div>
+
+        <div class="border border-dark m-2 p-2 rounded">
+            <CreateBonusComponent OnBonusCreated="RefreshBonuses" />
+        </div>
+
     </Authorized>
+
     <NotAuthorized>
-        <ListTraitsComponent traits="traits" bonuses="true" mode="TraitsSpellsDisplayMode.Display"></ListTraitsComponent>
+
+        <ListTraitsComponent traits="traits"
+                             bonuses="true"
+                             mode="TraitsSpellsDisplayMode.Display">
+        </ListTraitsComponent>
+
     </NotAuthorized>
+
 </AuthorizeView>
 
 @code {
+
     [SupplyParameterFromForm]
-    private Trait trait { get; set; } = new Trait
+    private Trait trait { get; set; } = new()
         {
             Name = string.Empty,
             Rank = 0
         };
 
-    List<Trait> traits = new List<Trait>();
-    int addbonus = 0;
+    private List<Trait> traits = new();
 
-    List<Bonus> bonuses = new List<Bonus>();
+    private List<Bonus> bonuses = new();
 
-    List<CharacterClass> classes = new();
+    private List<CharacterClass> classes = new();
 
-    List<int> selectedClassIds = new();
+    private List<int> selectedClassIds = new();
+
+    private int selectedBonusId;
 
     protected override void OnParametersSet()
     {
@@ -127,22 +401,22 @@
         bonuses = TraitsRepository.GetBonuses();
         classes = ClassesRepository.GetClasses();
     }
-    private void AddBonus()
+
+    private void RefreshBonuses()
     {
-        Bonus? bonus = TraitsRepository.GetBonusById(addbonus);
-        if (bonus is not null) trait.Bonuses.Add(bonus);
         bonuses = TraitsRepository.GetBonuses();
     }
-    private void Create()
+
+    private bool IsClassSelected(int classId)
     {
-        TraitsRepository.AddTrait(trait, selectedClassIds);
-        trait = new Trait { Name = string.Empty, Rank = 0, EligibleClasses = new() };
-        selectedClassIds = new();
-        traits = TraitsRepository.GetTraits();
+        return selectedClassIds.Contains(classId);
     }
+
     private void ToggleClass(int classId, object? value)
     {
-        bool selected = bool.TryParse(value?.ToString(), out bool result) && result;
+        bool selected =
+            bool.TryParse(value?.ToString(), out bool result)
+            && result;
 
         if (selected)
         {
@@ -156,4 +430,105 @@
             selectedClassIds.Remove(classId);
         }
     }
+
+    private void AddSelectedBonus()
+    {
+        if (selectedBonusId <= 0)
+        {
+            return;
+        }
+
+        Bonus? bonus =
+            TraitsRepository.GetBonusById(selectedBonusId);
+
+        if (bonus is null)
+        {
+            return;
+        }
+
+        if (trait.Bonuses.Any(b => b.BonusId == bonus.BonusId))
+        {
+            return;
+        }
+
+        trait.Bonuses.Add(bonus);
+    }
+
+    private void RemoveBonus(int bonusId)
+    {
+        Bonus? bonus =
+            trait.Bonuses.FirstOrDefault(
+                b => b.BonusId == bonusId);
+
+        if (bonus is not null)
+        {
+            trait.Bonuses.Remove(bonus);
+        }
+    }
+
+    private void AddPrerequisiteGroup()
+    {
+        int nextGroupId = trait.Prerequisites.Any()
+            ? trait.Prerequisites.Max(p => p.GroupId) + 1
+            : 1;
+
+        trait.Prerequisites.Add(
+            new Prerequisite
+                {
+                    GroupId = nextGroupId,
+                    Type = PrerequisiteType.Trait
+                });
+    }
+
+    private void AddAlternate(int groupId)
+    {
+        trait.Prerequisites.Add(
+            new Prerequisite
+                {
+                    GroupId = groupId,
+                    Type = PrerequisiteType.Trait
+                });
+    }
+
+    private void DeleteGroup(int groupId)
+    {
+        trait.Prerequisites.RemoveAll(
+            p => p.GroupId == groupId);
+    }
+
+    private void RemovePrerequisite(
+        Prerequisite prerequisite)
+    {
+        trait.Prerequisites.Remove(prerequisite);
+    }
+
+    private static int ParseLevel(string value)
+    {
+        return int.TryParse(value, out int level)
+            ? level
+            : 1;
+    }
+
+    private void Create()
+    {
+        TraitsRepository.AddTrait(
+            trait,
+            selectedClassIds);
+
+        trait = new Trait
+            {
+                Name = string.Empty,
+                Rank = 0,
+                EligibleClasses = new(),
+                Bonuses = new(),
+                Prerequisites = new()
+            };
+
+        selectedClassIds = new();
+
+        selectedBonusId = 0;
+
+        traits = TraitsRepository.GetTraits();
+    }
+
 }

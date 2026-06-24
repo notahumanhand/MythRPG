@@ -10,11 +10,12 @@ else if (traits is null || traits.Count == 0)
 {
     <p>No traits to display.</p>
 }
-else 
+else
 {
     @foreach (var trait in traits.OrderBy(t => t.Name))
     {
         <div class="border border-dark m-2 p-2 rounded">
+
             @if (mode == TraitsSpellsDisplayMode.CharacterEdit)
             {
                 <div class="row">
@@ -23,7 +24,11 @@ else
                         <br />
                     </div>
                     <div class="col-md-1">
-                        <button type="button" class="btn btn-danger" @onclick="() => Remove(trait)">Remove</button>
+                        <button type="button"
+                                class="btn btn-danger"
+                                @onclick="() => Remove(trait)">
+                            Remove
+                        </button>
                     </div>
                 </div>
             }
@@ -58,11 +63,20 @@ else
                         <h4>@trait.Name</h4>
                         <br />
                     </div>
+
                     <div class="col-md-1">
-                        <a class="btn btn-primary" href="/trait/edit/@trait.TraitId">Edit</a>
+                        <a class="btn btn-primary"
+                           href="/trait/edit/@trait.TraitId">
+                            Edit
+                        </a>
                     </div>
+
                     <div class="col-md-1">
-                        <button type="button" class="btn btn-danger" @onclick="() => Delete(trait)">Delete</button>
+                        <button type="button"
+                                class="btn btn-danger"
+                                @onclick="() => Delete(trait)">
+                            Delete
+                        </button>
                     </div>
                 </div>
             }
@@ -71,48 +85,86 @@ else
                 <h4>@trait.Name</h4>
                 <br />
             }
+
             @if (string.Equals(trait.Source, "Class Trait", StringComparison.OrdinalIgnoreCase))
             {
-                <h5><b>Class:</b> @ClassDisplay(trait)</h5>
+                <div class="row">
+
+                    <div class="col-md-3 border border-dark p-2 rounded"
+                         style="background: #EEECE5;">
+                        <b>Source</b><br>
+                        @trait.Source
+                    </div>
+
+                    <div class="col-md-3 border border-dark p-2 rounded"
+                         style="background: #EEECE5;">
+                        <b>Rank</b><br>
+                        @trait.Rank
+                    </div>
+
+                    <div class="col-md-3 border border-dark p-2 rounded"
+                         style="background: #EEECE5;">
+                        <b>Classes</b><br>
+                        @ClassDisplay(trait)
+                    </div>
+
+                    <div class="col-md-3 border border-dark p-2 rounded"
+                         style="background: #EEECE5;">
+                        <b>Prerequisites</b><br>
+                        @((MarkupString)PrerequisiteDisplay(trait))
+                    </div>
+
+                </div>
             }
-            <div class="row">
-                <div class="col-md-4 border border-dark p-2 rounded" style="background: #EEECE5;">
-                    <b>Source</b><br>
-                    @trait.Source
+            else
+            {
+                <div class="row">
+
+                    <div class="col-md-3 border border-dark p-2 rounded"
+                         style="background: #EEECE5;">
+                        <b>Source</b><br>
+                        @trait.Source
+                    </div>
+
                 </div>
-                <div class="col-md-4 border border-dark p-2 rounded" style="background: #EEECE5;">
-                    <b>Rank</b><br>
-                    @trait.Rank
-                </div>
-                <div class="col-md-4 border border-dark p-2 rounded" style="background: #EEECE5;">
-                    <b>Prerequisites</b><br>
-                    None
-                </div>
-            </div>
+            }
+
             @if (bonuses)
             {
                 <h5>Bonuses</h5>
-                <ListBonusesComponent bonuses="@trait.Bonuses" showId="false"></ListBonusesComponent>
+
+                <ListBonusesComponent bonuses="@trait.Bonuses"
+                                      showId="false">
+                </ListBonusesComponent>
             }
+
             <h5>Description</h5>
+
             <div>
                 @MarkdownHelper.ToMarkup(trait.Description)
             </div>
+
         </div>
     }
 }
 
 @code {
+
     [Parameter]
     public required List<Trait> traits { get; set; }
+
     [Parameter]
     public int charId { get; set; } = 0;
+
     [Parameter]
     public int classId { get; set; } = 0;
+
     [Parameter]
     public required bool bonuses { get; set; }
+
     [Parameter]
     public required TraitsSpellsDisplayMode mode { get; set; }
+
     void Remove(Trait trait)
     {
         if (mode == TraitsSpellsDisplayMode.CharacterEdit)
@@ -132,6 +184,7 @@ else
             StateHasChanged();
         }
     }
+
     void Delete(Trait trait)
     {
         TraitsRepository.DeleteTrait(trait.TraitId);
@@ -140,9 +193,13 @@ else
 
         StateHasChanged();
     }
+
     private string ClassDisplay(Trait trait)
     {
-        if (!string.Equals(trait.Source, "Class Trait", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(
+            trait.Source,
+            "Class Trait",
+            StringComparison.OrdinalIgnoreCase))
         {
             return string.Empty;
         }
@@ -152,6 +209,23 @@ else
             return "All";
         }
 
-        return string.Join(", ", trait.EligibleClasses.Select(c => c.Name).OrderBy(n => n));
+        return string.Join(
+            ", ",
+            trait.EligibleClasses
+                .Select(c => c.Name)
+                .OrderBy(n => n));
     }
+
+    private string PrerequisiteDisplay(Trait trait)
+    {
+        if (!trait.Prerequisites.Any())
+        {
+            return "None";
+        }
+
+        return string.Join(
+            "<br>",
+            trait.GetFormattedPrerequisiteGroups());
+    }
+
 }

@@ -18,8 +18,11 @@
         Trait? GetTraitByName(string name);
         void UpdateTrait(int id, Trait trait, List<int>? eligibleClassIds);
         List<Trait> GetAvailableTraitsForClass(int classId);
+        void RemoveTraitFromIncompatibilityGroup(int traitId, int incompatibilityGroupId);
+        void AddTraitToIncompatibilityGroup(int traitId, int incompatibilityGroupId);
         void AddTraitIncompatibility(List<int> traitIds);
         void RemoveTraitIncompatibility(int incompatibilityGroupId);
+        void ReplaceTraitIncompatibility(int incompatibilityGroupId, List<int> traitIds);
         List<int> GetUsedIncompatibilityGroups();
         List<Trait> GetTraitsInIncompatibilityGroup(int incompatibilityGroupId);
     }

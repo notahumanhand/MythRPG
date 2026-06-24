@@ -1,0 +1,498 @@
+﻿@page "/incompatibilities"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject ITraitsRepository TraitsRepository
+
+<PageTitle>Mythmaven: Manage Incompatibilities</PageTitle>
+
+<h3>Manage Trait Incompatibilities</h3>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <div class="alert alert-success">
+        @successMessage
+
+        <button type="button"
+                class="btn btn-sm btn-danger float-end"
+                @onclick="ClearMessages">
+            X
+        </button>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+
+        <button type="button"
+                class="btn btn-sm btn-danger float-end"
+                @onclick="ClearMessages">
+            X
+        </button>
+    </div>
+}
+
+<table class="table table-striped">
+
+    <thead>
+        <tr>
+            <th style="width:1%">
+                Group
+            </th>
+
+            <th>
+                Traits
+            </th>
+
+            <th style="width:1%">
+                Edit
+            </th>
+
+            <th style="width:1%">
+                Delete
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var group in incompatibilityGroups.OrderBy(g => g.Key))
+        {
+            bool editing =
+            editingGroupId == group.Key;
+
+            <tr>
+
+                <td>
+                    @group.Key
+                </td>
+
+                <td>
+
+                    @if (!editing)
+                    {
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+
+                            @foreach (var trait in group.Value)
+                            {
+                                <span>
+
+                                    @trait.Name
+
+                                    @if (group.Value.Count > 2)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger ms-1"
+                                                @onclick="() => RemoveTrait(group.Key, trait.TraitId)">
+                                            X
+                                        </button>
+                                    }
+
+                                </span>
+                            }
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+
+                            @foreach (var row in editTraitRows)
+                            {
+                                <div @key="row.RowId">
+
+                                    <InputSelect @bind-Value="row.TraitId"
+                                                 class="form-select d-inline-block"
+                                                 style="width:250px">
+
+                                        @foreach (var trait in classTraits)
+                                        {
+                                            <option value="@trait.TraitId">
+                                                @trait.Name
+                                            </option>
+                                        }
+
+                                    </InputSelect>
+
+                                    @if (editTraitRows.Count > 2)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm ms-1"
+                                                @onclick="() => RemoveEditRow(row)">
+                                            -
+                                        </button>
+                                    }
+
+                                </div>
+                            }
+
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm"
+                                    @onclick="AddEditRow">
+                                +
+                            </button>
+
+                        </div>
+                    }
+
+                </td>
+
+                <td>
+
+                    @if (!editing)
+                    {
+                        <button type="button"
+                                class="btn btn-primary"
+                                @onclick="() => BeginEdit(group.Key)">
+                            Edit
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button"
+                                class="btn btn-success"
+                                @onclick="() => SaveEdit(group.Key)">
+                            Save
+                        </button>
+                    }
+
+                </td>
+
+                <td>
+
+                    <button type="button"
+                            class="btn btn-danger"
+                            @onclick="() => DeleteGroup(group.Key)">
+                        Delete
+                    </button>
+
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>
+
+<hr />
+
+<h4>Add Incompatibility Group</h4>
+
+<div class="border border-dark rounded p-3">
+
+    <div class="d-flex flex-wrap align-items-center gap-2">
+
+        @foreach (var row in newTraitRows)
+        {
+            <div @key="row.RowId">
+
+                <InputSelect @bind-Value="row.TraitId"
+                             class="form-select d-inline-block"
+                             style="width:250px">
+
+                    @foreach (var trait in classTraits)
+                    {
+                        <option value="@trait.TraitId">
+                            @trait.Name
+                        </option>
+                    }
+
+                </InputSelect>
+
+                @if (newTraitRows.Count > 2)
+                {
+                    <button type="button"
+                            class="btn btn-danger btn-sm ms-1"
+                            @onclick="() => RemoveNewRow(row)">
+                        -
+                    </button>
+                }
+
+            </div>
+        }
+
+        <button type="button"
+                class="btn btn-secondary btn-sm"
+                @onclick="AddNewRow">
+            +
+        </button>
+
+    </div>
+
+    <div class="mt-3">
+
+        <button type="button"
+                class="btn btn-success"
+                @onclick="CreateGroup">
+            Add
+        </button>
+
+        <button type="button"
+                class="btn btn-secondary ms-2"
+                @onclick="ResetCreateRows">
+            Clear
+        </button>
+
+    </div>
+
+</div>
+
+<br />
+
+<a class="btn btn-primary"
+   href="/traits">
+    Return to Traits
+</a>
+
+@code {
+
+    private class TraitSelectionRow
+    {
+        public Guid RowId { get; set; } = Guid.NewGuid();
+
+        public int TraitId { get; set; }
+    }
+
+    private Dictionary<int, List<Trait>> incompatibilityGroups = new();
+
+    private List<Trait> classTraits = new();
+
+    private List<TraitSelectionRow> newTraitRows = new();
+
+    private List<TraitSelectionRow> editTraitRows = new();
+
+    private int? editingGroupId;
+
+    private string successMessage = string.Empty;
+
+    private string errorMessage = string.Empty;
+
+    private int DefaultTraitId =>
+        classTraits.FirstOrDefault()?.TraitId ?? 0;
+
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+
+    private void LoadData()
+    {
+        classTraits = TraitsRepository
+            .GetTraits()
+            .Where(t => t.Source == "Class Trait")
+            .OrderBy(t => t.Name)
+            .ToList();
+
+        incompatibilityGroups.Clear();
+
+        foreach (var groupId in TraitsRepository.GetUsedIncompatibilityGroups())
+        {
+            incompatibilityGroups[groupId]
+                = TraitsRepository.GetTraitsInIncompatibilityGroup(groupId);
+        }
+
+        if (!newTraitRows.Any())
+        {
+            ResetCreateRows();
+        }
+    }
+
+    private void ClearMessages()
+    {
+        successMessage = string.Empty;
+        errorMessage = string.Empty;
+    }
+
+    private void ResetCreateRows()
+    {
+        newTraitRows = new()
+        {
+            new TraitSelectionRow
+            {
+                TraitId = DefaultTraitId
+            },
+            new TraitSelectionRow
+            {
+                TraitId = DefaultTraitId
+            }
+        };
+    }
+
+    private void AddNewRow()
+    {
+        newTraitRows.Add(
+            new TraitSelectionRow
+                {
+                    TraitId = DefaultTraitId
+                });
+    }
+
+    private void RemoveNewRow(
+        TraitSelectionRow row)
+    {
+        if (newTraitRows.Count <= 2)
+        {
+            return;
+        }
+
+        newTraitRows.Remove(row);
+    }
+
+    private void AddEditRow()
+    {
+        editTraitRows.Add(
+            new TraitSelectionRow
+                {
+                    TraitId = DefaultTraitId
+                });
+    }
+
+    private void RemoveEditRow(
+        TraitSelectionRow row)
+    {
+        if (editTraitRows.Count <= 2)
+        {
+            return;
+        }
+
+        editTraitRows.Remove(row);
+    }
+
+    private bool HasDuplicateTraits(
+        IEnumerable<int> traitIds)
+    {
+        return traitIds
+            .GroupBy(t => t)
+            .Any(g => g.Count() > 1);
+    }
+
+    private void CreateGroup()
+    {
+        ClearMessages();
+
+        List<int> traitIds = newTraitRows
+            .Select(r => r.TraitId)
+            .ToList();
+
+        if (HasDuplicateTraits(traitIds))
+        {
+            errorMessage =
+                "All selected traits must be unique.";
+
+            return;
+        }
+
+        try
+        {
+            TraitsRepository.AddTraitIncompatibility(
+                traitIds);
+
+            successMessage =
+                "Incompatibility group created.";
+
+            ResetCreateRows();
+
+            LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private void DeleteGroup(
+        int groupId)
+    {
+        ClearMessages();
+
+        TraitsRepository.RemoveTraitIncompatibility(
+            groupId);
+
+        successMessage =
+            "Incompatibility group deleted.";
+
+        if (editingGroupId == groupId)
+        {
+            editingGroupId = null;
+            editTraitRows.Clear();
+        }
+
+        LoadData();
+    }
+
+    private void RemoveTrait(
+        int groupId,
+        int traitId)
+    {
+        ClearMessages();
+
+        TraitsRepository.RemoveTraitFromIncompatibilityGroup(
+            traitId,
+            groupId);
+
+        successMessage =
+            "Trait removed from incompatibility group.";
+
+        LoadData();
+    }
+
+    private void BeginEdit(
+        int groupId)
+    {
+        ClearMessages();
+
+        editingGroupId = groupId;
+
+        editTraitRows = incompatibilityGroups[groupId]
+            .Select(t => new TraitSelectionRow
+                {
+                    TraitId = t.TraitId
+                })
+            .ToList();
+    }
+
+    private void SaveEdit(
+        int groupId)
+    {
+        ClearMessages();
+
+        List<int> traitIds = editTraitRows
+            .Select(r => r.TraitId)
+            .ToList();
+
+        if (HasDuplicateTraits(traitIds))
+        {
+            errorMessage =
+                "All selected traits must be unique.";
+
+            return;
+        }
+
+        try
+        {
+            TraitsRepository.ReplaceTraitIncompatibility(
+                groupId,
+                traitIds);
+
+            successMessage =
+                "Incompatibility group updated.";
+
+            editingGroupId = null;
+
+            editTraitRows.Clear();
+
+            LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+}

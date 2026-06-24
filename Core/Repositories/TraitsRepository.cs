@@ -281,6 +281,124 @@ namespace MythRPG.Core.Repositories
                 trait.SetIncompatibilityGroups(groups);
             }
         }
+        public void AddTraitToIncompatibilityGroup(int traitId, int incompatibilityGroupId)
+        {
+            var db = contextFactory;
+
+            var trait = db.Traits
+                .FirstOrDefault(t => t.TraitId == traitId);
+
+            if (trait is null)
+            {
+                return;
+            }
+
+            if (trait.HasIncompatibilityGroup(incompatibilityGroupId))
+            {
+                return;
+            }
+
+            bool groupExists = db.Traits
+                .ToList()
+                .Any(t => t.HasIncompatibilityGroup(incompatibilityGroupId));
+
+            if (!groupExists)
+            {
+                throw new InvalidOperationException(
+                    $"Incompatibility group {incompatibilityGroupId} does not exist.");
+            }
+
+            AddIncompatibilityGroup(
+                trait,
+                incompatibilityGroupId);
+
+            db.SaveChanges();
+        }
+        public void RemoveTraitFromIncompatibilityGroup(int traitId, int incompatibilityGroupId)
+        {
+            var db = contextFactory;
+
+            var trait = db.Traits.FirstOrDefault(t => t.TraitId == traitId);
+
+            if (trait is null)
+            {
+                return;
+            }
+
+            RemoveIncompatibilityGroup(
+                trait,
+                incompatibilityGroupId);
+
+            var remainingTraits = db.Traits
+                .ToList()
+                .Where(t => t.HasIncompatibilityGroup(incompatibilityGroupId))
+                .ToList();
+
+            if (remainingTraits.Count < 2)
+            {
+                foreach (var remainingTrait in remainingTraits)
+                {
+                    RemoveIncompatibilityGroup(
+                        remainingTrait,
+                        incompatibilityGroupId);
+                }
+            }
+
+            db.SaveChanges();
+        }
+        public void ReplaceTraitIncompatibility(int incompatibilityGroupId, List<int> traitIds)
+        {
+            traitIds = traitIds.Distinct().ToList();
+
+            if (traitIds.Count < 2)
+            {
+                throw new InvalidOperationException(
+                    "An incompatibility group must contain at least two traits.");
+            }
+
+            var db = contextFactory;
+
+            bool groupExists = db.Traits
+                .ToList()
+                .Any(t => t.HasIncompatibilityGroup(incompatibilityGroupId));
+
+            if (!groupExists)
+            {
+                throw new InvalidOperationException(
+                    $"Incompatibility group {incompatibilityGroupId} does not exist.");
+            }
+
+            var traitsInGroup = db.Traits
+                .ToList()
+                .Where(t => t.HasIncompatibilityGroup(incompatibilityGroupId))
+                .ToList();
+
+            foreach (var trait in traitsInGroup)
+            {
+                RemoveIncompatibilityGroup(
+                    trait,
+                    incompatibilityGroupId);
+            }
+
+            var selectedTraits = db.Traits
+                .Where(t => traitIds.Contains(t.TraitId))
+                .ToList();
+
+            if (selectedTraits.Count != traitIds.Count)
+            {
+                throw new InvalidOperationException(
+                    "One or more selected traits could not be found.");
+            }
+
+            foreach (var trait in selectedTraits)
+            {
+                AddIncompatibilityGroup(
+                    trait,
+                    incompatibilityGroupId);
+            }
+
+            db.SaveChanges();
+        }
         public List<int> GetUsedIncompatibilityGroups()
         {
             var db = contextFactory;
